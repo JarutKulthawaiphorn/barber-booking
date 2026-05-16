@@ -54,7 +54,7 @@ We'll know we're right when **a meaningful share of bookings arrives through the
 | # | Milestone | Outcome | Status | Plan |
 |---|---|---|---|---|
 | 1 | Shop hours and closed days configurable | Admin can set open/close times, the weekly closed day, and one-off closed dates; these rules are persisted and ready to constrain the booking UI | in-progress | [.claude/plans/barber-booking-shop-hours.plan.md](.claude/plans/barber-booking-shop-hours.plan.md) |
-| 2 | Customer can book a slot | A visitor enters phone + date + time and a booking is recorded; the date picker is bounded to today → today + 13 days and skips admin closed days; the time dropdown only offers 30-minute slots within open hours | pending | — |
+| 2 | Customer can book a slot | A visitor enters phone + date + time and a booking is recorded; the date picker is bounded to today → today + 13 days and skips admin closed days; the time dropdown only offers 30-minute slots within open hours | in-progress | [.claude/plans/barber-booking-customer-booking.plan.md](.claude/plans/barber-booking-customer-booking.plan.md) |
 | 3 | Customer can look up bookings by phone | A returning visitor enters their phone number and sees the bookings tied to it | pending | — |
 
 ## Open Questions
