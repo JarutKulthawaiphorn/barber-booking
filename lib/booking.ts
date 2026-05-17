@@ -197,6 +197,26 @@ export async function getBookingsByPhone(phone: string): Promise<Booking[]> {
 }
 
 /**
+ * Admin-only: delete any booking by id, regardless of phone or date.
+ * Past-date deletions are intentionally allowed — admin is trusted, and the
+ * data is treated as operational state, not an audit log. If historical
+ * reporting is added later, switch this to a soft delete instead.
+ */
+export async function adminCancelBooking(id: string): Promise<void> {
+  if (!UUID_RE.test(id)) throw new Error('Booking not found');
+
+  const { data, error } = await getSupabase()
+    .from('bookings')
+    .delete()
+    .eq('id', id)
+    .select('id')
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to cancel booking: ${error.message}`);
+  if (!data) throw new Error('Booking not found');
+}
+
+/**
  * Delete a future booking matched by both id and phone (so users can only cancel
  * their own). Past bookings are not cancellable. Throws "Booking not found" for
  * any mismatch — id wrong, phone wrong, or already past — without leaking which.

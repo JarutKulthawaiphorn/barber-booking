@@ -1,7 +1,10 @@
+import Link from 'next/link';
+
 import { requireAdmin } from '@/lib/auth';
 import { getShopSettings, listClosedDates } from '@/lib/shop-settings';
 import { todayInBangkok } from '@/lib/timezone';
 
+import { inputClass, primaryButtonClass } from './_styles';
 import {
   addClosedDateAction,
   removeClosedDateAction,
@@ -17,12 +20,6 @@ const WEEKDAY_NAMES = [
   'Friday',
   'Saturday',
 ] as const;
-
-const inputClass =
-  'mt-2 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50';
-
-const primaryButtonClass =
-  'rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200';
 
 export default async function AdminPage({
   searchParams,
@@ -48,14 +45,22 @@ export default async function AdminPage({
             <span className="font-medium text-zinc-700 dark:text-zinc-300">{username}</span>
           </p>
         </div>
-        <form action="/admin/logout" method="post">
-          <button
-            type="submit"
+        <div className="flex items-center gap-4">
+          <Link
+            href="/admin/bookings"
             className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
           >
-            Log out
-          </button>
-        </form>
+            Manage bookings
+          </Link>
+          <form action="/admin/logout" method="post">
+            <button
+              type="submit"
+              className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
+            >
+              Log out
+            </button>
+          </form>
+        </div>
       </header>
 
       {params.error ? (

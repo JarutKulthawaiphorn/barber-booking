@@ -36,5 +36,5 @@ export async function loginAction(formData: FormData): Promise<void> {
     maxAge: ADMIN_COOKIE_MAX_AGE_SEC,
   });
 
-  redirect('/admin');
+  redirect('/admin/bookings');
 }
