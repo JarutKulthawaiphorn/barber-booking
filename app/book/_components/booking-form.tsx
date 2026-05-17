@@ -22,17 +22,6 @@ const inputClass =
 const primaryButtonClass =
   'rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200';
 
-function formatDateLabel(yyyyMmDd: string): string {
-  const [y, m, d] = yyyyMmDd.split('-').map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  return dt.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
-}
-
 export function BookingForm({ bookableDates, initialDate, initialSlots }: Props) {
   const [date, setDate] = useState<string>(initialDate ?? '');
   const [slotsState, setSlotsState] = useState<SlotsState>({
@@ -42,8 +31,11 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
   });
   const [submitting, startSubmit] = useTransition();
 
+  const isClosedDate = date !== '' && !bookableDates.includes(date);
+
   useEffect(() => {
     if (date === initialDate || !date) return;
+    if (!bookableDates.includes(date)) return;
 
     const controller = new AbortController();
 
@@ -67,7 +59,7 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
     })();
 
     return () => controller.abort();
-  }, [date, initialDate]);
+  }, [date, initialDate, bookableDates]);
 
   if (bookableDates.length === 0) {
     return (
@@ -77,7 +69,8 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
     );
   }
 
-  const { list: slots, error: slotsError } = slotsState;
+  const slotsError = slotsState.error;
+  const slots = isClosedDate ? [] : slotsState.list;
 
   return (
     <form
@@ -104,19 +97,16 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
 
       <label className="text-sm">
         <span className="block font-medium text-zinc-700 dark:text-zinc-300">Date</span>
-        <select
+        <input
+          type="date"
           name="bookedOn"
           required
           value={date}
+          min={bookableDates[0]}
+          max={bookableDates[bookableDates.length - 1]}
           onChange={(e) => setDate(e.target.value)}
           className={inputClass}
-        >
-          {bookableDates.map((d) => (
-            <option key={d} value={d}>
-              {formatDateLabel(d)}
-            </option>
-          ))}
-        </select>
+        />
       </label>
 
       <label className="text-sm">
@@ -130,7 +120,11 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
           key={`${date}-${slots.join(',')}`}
         >
           <option value="" disabled>
-            {slots.length === 0 ? 'No slots available' : 'Pick a time'}
+            {isClosedDate
+              ? 'Closed'
+              : slots.length === 0
+                ? 'No slots available'
+                : 'Pick a time'}
           </option>
           {slots.map((s) => (
             <option key={s} value={s}>
@@ -138,7 +132,11 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
             </option>
           ))}
         </select>
-        {slotsError ? (
+        {isClosedDate ? (
+          <span className="mt-1 block text-xs text-amber-700 dark:text-amber-300">
+            Shop is closed on this date.
+          </span>
+        ) : slotsError ? (
           <span className="mt-1 block text-xs text-red-600 dark:text-red-400">{slotsError}</span>
         ) : null}
       </label>

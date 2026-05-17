@@ -197,6 +197,29 @@ export async function getBookingsByPhone(phone: string): Promise<Booking[]> {
 }
 
 /**
+ * Delete a future booking matched by both id and phone (so users can only cancel
+ * their own). Past bookings are not cancellable. Throws "Booking not found" for
+ * any mismatch — id wrong, phone wrong, or already past — without leaking which.
+ */
+export async function cancelBooking(args: { id: string; phone: string }): Promise<void> {
+  if (!UUID_RE.test(args.id)) throw new Error('Booking not found');
+  const phone = validatePhone(args.phone);
+  const today = todayInBangkok();
+
+  const { data, error } = await getSupabase()
+    .from('bookings')
+    .delete()
+    .eq('id', args.id)
+    .eq('phone', phone)
+    .gte('booked_on', today)
+    .select('id')
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to cancel booking: ${error.message}`);
+  if (!data) throw new Error('Booking not found');
+}
+
+/**
  * Validate, check the active-booking cap, and insert. Returns the new booking row.
  * Maps the unique-constraint violation to a user-facing "slot just taken" message.
  */
