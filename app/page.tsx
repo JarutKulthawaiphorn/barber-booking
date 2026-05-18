@@ -13,130 +13,165 @@ const WEEKDAY_NAMES = [
   'Saturday',
 ] as const;
 
-/**
- * Render the open-day range as e.g. "Tuesday through Sunday" when one weekday
- * is closed, or "Every day" when the shop never closes weekly.
- */
 function formatOpenDayRange(weeklyClosed: number | null): string {
   if (weeklyClosed === null) return 'Every day';
   const start = (weeklyClosed + 1) % 7;
   const end = (weeklyClosed + 6) % 7;
-  return `${WEEKDAY_NAMES[start]} through ${WEEKDAY_NAMES[end]}`;
+  return `${WEEKDAY_NAMES[start]} – ${WEEKDAY_NAMES[end]}`;
 }
 
-/**
- * Async island for the dynamic "Hours" tile. Hoisted into its own component so
- * the rest of the home page renders from the static shell immediately and this
- * block streams in once `getShopSettings()` resolves from the tagged cache.
- *
- * Replaces the old `dynamic = 'force-dynamic'` on the whole page — only this
- * tile actually needs the data, and the cache means most loads serve from
- * memory anyway.
- */
 async function HoursTile() {
   const settings = await getShopSettings();
   return (
     <>
-      <p className="font-display mt-2 text-2xl text-ink numerals">
-        {settings.openTime} — {settings.closeTime}
-      </p>
-      <p className="mt-1 text-sm text-ink-mid">
-        {formatOpenDayRange(settings.weeklyClosedWeekday)}
-      </p>
+      <div className="flex items-baseline justify-between gap-3 text-[15px]">
+        <span style={{ color: 'var(--color-ink-2)' }}>
+          {formatOpenDayRange(settings.weeklyClosedWeekday)}
+        </span>
+        <span className="tnum">
+          {settings.openTime} – {settings.closeTime}
+        </span>
+      </div>
+      {settings.weeklyClosedWeekday !== null ? (
+        <div className="flex items-baseline justify-between gap-3 text-[15px]">
+          <span style={{ color: 'var(--color-ink-2)' }}>
+            {WEEKDAY_NAMES[settings.weeklyClosedWeekday]}
+          </span>
+          <span style={{ color: 'var(--color-muted)' }}>Closed</span>
+        </div>
+      ) : null}
     </>
   );
 }
 
 function HoursTileFallback() {
   return (
-    <>
-      <p className="font-display mt-2 text-2xl text-ink-faint numerals">— : — — — : —</p>
-      <p className="mt-1 text-sm text-ink-faint italic">Loading…</p>
-    </>
+    <div className="flex items-baseline justify-between gap-3 text-[15px]">
+      <span style={{ color: 'var(--color-faint)' }}>Loading hours…</span>
+    </div>
   );
 }
 
 export default function HomePage() {
   return (
-    <main className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:py-14">
-      {/* Top marque */}
-      <header className="reveal reveal-d1 flex items-center justify-between text-[0.72rem] tracking-mark text-ink-soft">
-        <span className="flex items-center gap-2">
-          <span className="inline-block h-1.5 w-1.5 rotate-45 bg-burgundy" />
-          The Bangkok Barber
-        </span>
-        <span className="hidden sm:inline">Est. MMXXVI · Asia/Bangkok</span>
+    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-4 pt-4 pb-10 sm:px-6">
+      {/* Top brand row */}
+      <header className="flex items-center justify-between px-1 pt-2">
+        <div className="flex items-center gap-2">
+          <div
+            className="flex h-7 w-7 items-center justify-center rounded-md text-[13px] font-bold"
+            style={{
+              background: 'var(--color-ink)',
+              color: 'var(--color-bg)',
+              letterSpacing: '-0.02em',
+            }}
+          >
+            B
+          </div>
+          <span className="text-[15px] font-semibold">Bangkok Barber</span>
+        </div>
         <Link
           href="/admin/login"
-          className="text-ink-faint hover:text-burgundy transition-colors"
+          className="text-[13px] no-underline"
+          style={{ color: 'var(--color-muted)' }}
         >
           Staff
         </Link>
       </header>
 
-      {/* Hero */}
-      <section className="relative mt-16 grid flex-1 grid-cols-12 gap-6 sm:mt-24">
-        {/* Animated barber pole */}
-        <div className="reveal reveal-d2 col-span-1 hidden sm:flex sm:items-stretch">
-          <div className="barber-pole w-3 rounded-full sm:w-4" aria-hidden="true" />
-        </div>
-
-        <div className="col-span-12 sm:col-span-11">
-          <p className="reveal reveal-d2 tracking-mark text-xs text-brass">
-            № 01 — Reservations
-          </p>
-
-          <h1 className="reveal reveal-d3 font-display mt-4 text-[clamp(3rem,9vw,7.5rem)] leading-[0.92] text-ink">
-            The chair,
+      <section className="mt-6 flex flex-col gap-5">
+        <div>
+          <h1
+            className="text-[28px] font-semibold leading-[1.15]"
+            style={{ letterSpacing: '-0.02em' }}
+          >
+            Book a chair at
             <br />
-            the clippers,
-            <br />
-            <em className="text-burgundy not-italic font-display italic">the cut.</em>
+            The Bangkok Barber.
           </h1>
+          <p
+            className="mt-2.5 max-w-[320px] text-[15px]"
+            style={{ color: 'var(--color-ink-2)' }}
+          >
+            One shop, two barbers. 30-minute slots, walk-ins welcome when a chair is free.
+          </p>
+        </div>
 
-          <div className="reveal reveal-d4 mt-10 max-w-xl">
-            <p className="text-base text-ink-soft sm:text-lg">
-              Thirty-minute appointments, six days a week. Pick a chair, leave a number, and we&apos;ll
-              hold the time.
-            </p>
-          </div>
+        <div className="flex flex-col gap-2.5">
+          <Link href="/book" className="btn btn-primary btn-block">
+            Book a chair
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M9 6l6 6-6 6"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </Link>
+          <Link href="/lookup" className="btn btn-secondary btn-block">
+            Find an existing booking
+          </Link>
+        </div>
 
-          <div className="reveal reveal-d5 mt-12 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-5">
-            <Link href="/book" className="btn-primary w-full sm:w-auto">
-              Book a chair
-              <span aria-hidden="true">→</span>
-            </Link>
-            <Link href="/lookup" className="btn-link">
-              Find an existing booking
-            </Link>
+        <div className="card card-pad flex flex-col gap-3.5">
+          <div className="flex items-baseline justify-between">
+            <h2
+              className="text-[12px] font-semibold uppercase"
+              style={{
+                color: 'var(--color-muted)',
+                letterSpacing: '0.06em',
+              }}
+            >
+              Hours
+            </h2>
+            <span className="badge badge-confirmed">
+              <span className="badge-dot" />
+              Asia / Bangkok
+            </span>
           </div>
+          <div className="flex flex-col gap-1.5">
+            <Suspense fallback={<HoursTileFallback />}>
+              <HoursTile />
+            </Suspense>
+          </div>
+        </div>
+
+        <div className="card card-pad flex flex-col gap-2.5">
+          <h2
+            className="text-[12px] font-semibold uppercase"
+            style={{
+              color: 'var(--color-muted)',
+              letterSpacing: '0.06em',
+            }}
+          >
+            Service
+          </h2>
+          <div className="flex flex-col gap-2 text-[15px]">
+            <div className="flex items-baseline justify-between">
+              <span>Haircut</span>
+              <span style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
+                <span className="tnum text-[13px]" style={{ color: 'var(--color-muted)' }}>
+                  30 min
+                </span>
+              </span>
+            </div>
+          </div>
+          <p className="mt-1 text-[13px]" style={{ color: 'var(--color-muted)' }}>
+            One price covers the chair — pay in cash on the day.
+          </p>
+        </div>
+
+        <div
+          className="text-[13px] leading-[1.55]"
+          style={{ color: 'var(--color-muted)' }}
+        >
+          Phone bookings only — Thai mobile numbers starting 06, 08 or 09.
+          <br />
+          Walk-ins after 18:00 if a chair is open.
         </div>
       </section>
-
-      {/* Lower ornament strip */}
-      <section className="reveal reveal-d6 mt-20 grid grid-cols-1 gap-8 border-t border-brass-pale/60 pt-10 sm:mt-28 sm:grid-cols-3">
-        <div>
-          <p className="tracking-mark text-[0.65rem] text-brass">Hours</p>
-          <Suspense fallback={<HoursTileFallback />}>
-            <HoursTile />
-          </Suspense>
-        </div>
-        <div>
-          <p className="tracking-mark text-[0.65rem] text-brass">Service</p>
-          <p className="font-display mt-2 text-2xl text-ink">Thirty minutes</p>
-          <p className="mt-1 text-sm text-ink-mid">Cut, shape, hot finish</p>
-        </div>
-        <div>
-          <p className="tracking-mark text-[0.65rem] text-brass">Reach us</p>
-          <p className="font-display mt-2 text-2xl text-ink">Phone only</p>
-          <p className="mt-1 text-sm text-ink-mid">06 / 08 / 09 numbers</p>
-        </div>
-      </section>
-
-      <footer className="mt-16 flex items-center justify-between text-[0.7rem] tracking-mark text-ink-faint">
-        <span>One chair · one cut · one time</span>
-        <span aria-hidden="true">✦</span>
-      </footer>
     </main>
   );
 }

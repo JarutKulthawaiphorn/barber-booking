@@ -15,7 +15,7 @@ import { todayInBangkok } from '@/lib/timezone';
 import { BookingForm } from './_components/booking-form';
 
 export const metadata: Metadata = {
-  title: 'Reserve a chair',
+  title: 'Book a chair',
   description:
     'Pick a 30-minute slot at The Bangkok Barber. Two-week booking window.',
 };
@@ -48,45 +48,54 @@ export default async function BookPage({
       })
     : [];
 
-  // Full 14-day window so the day-grid picker can render every day with the
-  // right enabled/disabled state.
   const dayGrid: string[] = Array.from({ length: LOOK_AHEAD_DAYS }, (_, i) =>
     addDays(today, i),
   );
   const bookableSet = new Set(bookableDates);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-6 py-12 sm:py-16">
-      <Link href="/" className="reveal reveal-d1 btn-link inline-block">
-        ← The Bangkok Barber
-      </Link>
-
-      <header className="reveal reveal-d2 mt-10">
-        <p className="tracking-mark text-xs text-brass">№ 02 — Reserve</p>
-        <h1 className="font-display mt-4 text-5xl leading-tight text-ink sm:text-6xl">
-          Reserve <em className="text-burgundy not-italic font-display italic">a chair</em>
-        </h1>
-        <p className="ornament-rule mt-6 text-xs tracking-mark">
-          <span>Half-hour appointments</span>
-        </p>
+    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col px-4 pt-2 pb-10 sm:px-6">
+      {/* Header */}
+      <header
+        className="flex min-h-[56px] items-center gap-2 px-1"
+        style={{ borderBottom: '1px solid var(--color-border)' }}
+      >
+        <Link
+          href="/"
+          className="btn btn-ghost btn-sm"
+          aria-label="Back"
+          style={{ padding: '0 8px', marginLeft: -8 }}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M15 6l-6 6 6 6"
+              stroke="currentColor"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </Link>
+        <h1 className="text-[17px] font-semibold">Book a chair</h1>
       </header>
 
       {params.error ? (
-        <p className="reveal reveal-d3 banner-error mt-8" role="alert">
+        <p className="banner banner-error mt-4" role="alert">
           {params.error}
         </p>
       ) : null}
 
-      <section className="reveal reveal-d3 corner-brackets card-paper mt-10 p-7 sm:p-10">
-        <BookingForm
-          dayGrid={dayGrid.map((d) => ({ date: d, open: bookableSet.has(d) }))}
-          initialDate={initialDate}
-          initialSlots={initialSlots}
-        />
-      </section>
+      <BookingForm
+        dayGrid={dayGrid.map((d) => ({ date: d, open: bookableSet.has(d) }))}
+        initialDate={initialDate}
+        initialSlots={initialSlots}
+      />
 
-      <p className="mt-8 text-xs tracking-mark text-ink-faint text-center">
-        Times shown in Asia / Bangkok
+      <p
+        className="mt-6 text-center text-[12px]"
+        style={{ color: 'var(--color-muted)' }}
+      >
+        Times shown in Asia / Bangkok · GMT+7
       </p>
     </main>
   );

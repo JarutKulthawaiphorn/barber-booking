@@ -3,7 +3,9 @@
     "allow": [
       "Bash(npm run *)",
       "Bash(pnpm test *)",
-      "Bash(pnpm build *)"
+      "Bash(pnpm build *)",
+      "Read(//c/c/Web Projects/**)",
+      "Read(//c/c/Web Projects/barber-booking/**)"
     ]
   }
 }

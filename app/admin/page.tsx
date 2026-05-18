@@ -12,9 +12,10 @@ import {
 } from './actions';
 
 export const metadata: Metadata = {
-  title: 'Admin - Settings',
+  title: 'Admin · Shop settings',
   robots: { index: false, follow: false },
 };
+
 const WEEKDAY_NAMES = [
   'Sunday',
   'Monday',
@@ -40,57 +41,66 @@ export default async function AdminPage({
   ]);
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
+    <main className="mx-auto w-full max-w-3xl px-4 py-4 sm:px-6 sm:py-6">
       <AdminHeader username={username} active="settings" />
 
       {params.error ? (
-        <p className="reveal reveal-d2 banner-error mt-8" role="alert">
+        <p className="banner banner-error mt-4" role="alert">
           {params.error}
         </p>
       ) : null}
-      {params.ok ? (
-        <p className="reveal reveal-d2 banner-ok mt-8">Saved.</p>
-      ) : null}
+      {params.ok ? <p className="banner banner-ok mt-4">Saved.</p> : null}
 
-      <section className="reveal reveal-d2 mt-12">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2 className="font-display text-3xl text-ink">Shop hours</h2>
-          <p className="tracking-mark text-[0.65rem] text-brass">Asia / Bangkok</p>
+      <section className="mt-6">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-[20px] font-semibold">Shop hours</h2>
+          <span className="text-[13px]" style={{ color: 'var(--color-muted)' }}>
+            Asia / Bangkok
+          </span>
         </div>
-        <p className="mt-2 text-sm text-ink-soft">
+        <p className="mt-1 text-[14px]" style={{ color: 'var(--color-muted)' }}>
           Applied to every open day.
         </p>
 
         <form
           action={updateSettingsAction}
-          className="corner-brackets card-paper mt-6 grid grid-cols-1 gap-5 p-7 sm:grid-cols-3 sm:p-8"
+          className="card card-pad mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3"
         >
-          <label>
-            <span className="label-mark">Open time</span>
+          <div className="field">
+            <label className="label" htmlFor="openTime">
+              Open time
+            </label>
             <input
+              id="openTime"
               type="time"
               name="openTime"
               defaultValue={settings.openTime}
               required
-              className="input-vintage numerals"
+              className="input tnum"
             />
-          </label>
-          <label>
-            <span className="label-mark">Close time</span>
+          </div>
+          <div className="field">
+            <label className="label" htmlFor="closeTime">
+              Close time
+            </label>
             <input
+              id="closeTime"
               type="time"
               name="closeTime"
               defaultValue={settings.closeTime}
               required
-              className="input-vintage numerals"
+              className="input tnum"
             />
-          </label>
-          <label>
-            <span className="label-mark">Closed every</span>
+          </div>
+          <div className="field">
+            <label className="label" htmlFor="weeklyClosedWeekday">
+              Closed every
+            </label>
             <select
+              id="weeklyClosedWeekday"
               name="weeklyClosedWeekday"
               defaultValue={settings.weeklyClosedWeekday ?? -1}
-              className="input-vintage"
+              className="select"
             >
               <option value={-1}>Open every day</option>
               {WEEKDAY_NAMES.map((name, i) => (
@@ -99,78 +109,96 @@ export default async function AdminPage({
                 </option>
               ))}
             </select>
-          </label>
+          </div>
           <div className="sm:col-span-3">
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="btn btn-primary">
               Save shop hours
             </button>
           </div>
         </form>
       </section>
 
-      <section className="reveal reveal-d3 mt-16">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2 className="font-display text-3xl text-ink">Closed dates</h2>
-          <p className="tracking-mark text-[0.65rem] text-brass">{closedDates.length} listed</p>
+      <section className="mt-8">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-[20px] font-semibold">Closed dates</h2>
+          <span className="text-[13px]" style={{ color: 'var(--color-muted)' }}>
+            {closedDates.length} listed
+          </span>
         </div>
-        <p className="mt-2 text-sm text-ink-soft">
+        <p className="mt-1 text-[14px]" style={{ color: 'var(--color-muted)' }}>
           One-off closures on top of the weekly closed day. Past dates are hidden.
         </p>
 
-        <ul className="mt-6 divide-y divide-brass-pale/40 border-y border-brass-pale/40">
+        <div className="card mt-4 overflow-hidden">
           {closedDates.length === 0 ? (
-            <li className="px-1 py-4 text-sm italic text-ink-faint">No closed dates yet.</li>
+            <p
+              className="px-4 py-5 text-[14px]"
+              style={{ color: 'var(--color-muted)' }}
+            >
+              No closed dates yet.
+            </p>
           ) : (
-            closedDates.map((d) => (
-              <li
-                key={d.id}
-                className="flex items-center justify-between gap-4 py-4 text-sm"
-              >
-                <div className="flex flex-wrap items-baseline gap-x-3">
-                  <span className="font-display numerals text-lg text-ink">{d.closedOn}</span>
-                  {d.note ? (
-                    <span className="italic text-ink-soft">— {d.note}</span>
-                  ) : null}
-                </div>
-                <form action={removeClosedDateAction}>
-                  <input type="hidden" name="id" value={d.id} />
-                  <button
-                    type="submit"
-                    className="tracking-mark text-[0.7rem] text-burgundy underline-offset-4 hover:underline"
-                  >
-                    Remove
-                  </button>
-                </form>
-              </li>
-            ))
+            <ul className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
+              {closedDates.map((d) => (
+                <li
+                  key={d.id}
+                  className="flex items-center justify-between gap-3 px-4 py-3 text-[14px]"
+                >
+                  <div className="flex flex-wrap items-baseline gap-x-3">
+                    <span className="tnum font-medium">{d.closedOn}</span>
+                    {d.note ? (
+                      <span style={{ color: 'var(--color-muted)' }}>
+                        {d.note}
+                      </span>
+                    ) : null}
+                  </div>
+                  <form action={removeClosedDateAction}>
+                    <input type="hidden" name="id" value={d.id} />
+                    <button
+                      type="submit"
+                      className="btn btn-ghost btn-sm"
+                      style={{ color: 'var(--color-danger)' }}
+                    >
+                      Remove
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
           )}
-        </ul>
+        </div>
 
         <form
           action={addClosedDateAction}
-          className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_2fr_auto] sm:items-end"
+          className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_2fr_auto] sm:items-end"
         >
-          <label>
-            <span className="label-mark">Date</span>
+          <div className="field">
+            <label className="label" htmlFor="closedOn">
+              Date
+            </label>
             <input
+              id="closedOn"
               type="date"
               name="closedOn"
               min={today}
               required
-              className="input-vintage numerals"
+              className="input tnum"
             />
-          </label>
-          <label>
-            <span className="label-mark">Note (optional)</span>
+          </div>
+          <div className="field">
+            <label className="label" htmlFor="note">
+              Note (optional)
+            </label>
             <input
+              id="note"
               type="text"
               name="note"
               maxLength={120}
               placeholder="e.g. Public holiday"
-              className="input-vintage"
+              className="input"
             />
-          </label>
-          <button type="submit" className="btn-ghost">
+          </div>
+          <button type="submit" className="btn btn-secondary">
             Add closure
           </button>
         </form>

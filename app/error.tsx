@@ -3,10 +3,6 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 
-/**
- * Root error boundary — catches uncaught errors from any route below `app/`.
- * Must be a client component per Next.js convention.
- */
 export default function RootError({
   error,
   reset,
@@ -15,31 +11,32 @@ export default function RootError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Surface the error to whatever monitoring is plugged in later.
-    // For now, the dev overlay + console is the floor.
     console.error('Unhandled route error:', error);
   }, [error]);
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col items-center justify-center px-6 py-16 text-center">
-      <p className="tracking-mark text-xs text-brass">№ — Something snapped</p>
-      <h1 className="font-display mt-4 text-4xl text-ink">
-        The <em className="font-display italic text-burgundy not-italic">shop</em> is sweeping up
-      </h1>
-      <p className="mt-4 text-sm text-ink-soft">
-        Something went wrong on our side. Try again in a moment.
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-4 py-10 text-center sm:px-6">
+      <h1 className="text-[22px] font-semibold">Something went wrong</h1>
+      <p
+        className="mt-2 text-[14px]"
+        style={{ color: 'var(--color-muted)' }}
+      >
+        Try again in a moment.
       </p>
       {error.digest ? (
-        <p className="mt-2 text-xs tracking-mark text-ink-faint">
+        <p
+          className="mt-2 mono text-[12px]"
+          style={{ color: 'var(--color-muted)' }}
+        >
           Reference: {error.digest}
         </p>
       ) : null}
 
-      <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:gap-5">
-        <button type="button" onClick={reset} className="btn-primary">
+      <div className="mt-6 flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
+        <button type="button" onClick={reset} className="btn btn-primary">
           Try again
         </button>
-        <Link href="/" className="btn-link">
+        <Link href="/" className="btn btn-secondary">
           Back to home
         </Link>
       </div>

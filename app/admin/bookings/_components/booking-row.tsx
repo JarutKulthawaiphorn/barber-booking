@@ -4,6 +4,10 @@ import { type FormEvent } from 'react';
 
 import { adminCancelBookingAction } from '../actions';
 
+function formatPhone(p: string): string {
+  return p.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+}
+
 export function BookingRow({
   id,
   slotTime,
@@ -26,27 +30,39 @@ export function BookingRow({
   }
 
   return (
-    <li className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-5">
-      <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
-        <span className="font-display numerals text-3xl text-burgundy">{slotTime}</span>
-        <span className="text-base text-ink">{customerName}</span>
-        <span className="numerals text-sm text-ink-soft">{phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')}</span>
-        {barberName ? (
-          <span className="rounded-sm border border-brass-pale/70 bg-paper-warm px-2 py-0.5 text-[0.7rem] tracking-mark text-brass">
-            Barber · {barberName}
-          </span>
-        ) : null}
-      </div>
-      <form action={adminCancelBookingAction} onSubmit={handleSubmit}>
-        <input type="hidden" name="id" value={id} />
-        <input type="hidden" name="date" value={date} />
-        <button
-          type="submit"
-          className="tracking-mark text-[0.7rem] text-burgundy underline-offset-4 hover:underline"
-        >
-          Cancel
-        </button>
-      </form>
+    <li
+      className="grid items-center px-4 py-3 text-[14px]"
+      style={{
+        gridTemplateColumns: '110px 1fr 180px 140px 80px',
+        gap: 12,
+      }}
+    >
+      <span className="tnum font-medium">{slotTime}</span>
+      <span className="truncate">{customerName}</span>
+      <span className="tnum" style={{ color: 'var(--color-muted)' }}>
+        {formatPhone(phone)}
+      </span>
+      <span style={{ color: 'var(--color-ink-2)' }}>
+        {barberName ?? '—'}
+      </span>
+      <span className="flex justify-end">
+        <form action={adminCancelBookingAction} onSubmit={handleSubmit}>
+          <input type="hidden" name="id" value={id} />
+          <input type="hidden" name="date" value={date} />
+          <button
+            type="submit"
+            className="btn btn-ghost btn-sm"
+            style={{
+              padding: '0 10px',
+              height: 30,
+              fontSize: 13,
+              color: 'var(--color-danger)',
+            }}
+          >
+            Cancel
+          </button>
+        </form>
+      </span>
     </li>
   );
 }

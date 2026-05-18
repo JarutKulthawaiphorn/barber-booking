@@ -21,9 +21,9 @@ function AdminBookingSubmitButton({ disabled }: { disabled: boolean }) {
     <button
       type="submit"
       disabled={pending || disabled}
-      className="btn-primary"
+      className="btn btn-primary"
     >
-      {pending ? 'Saving...' : 'Add booking'}
+      {pending ? 'Saving…' : 'Add booking'}
     </button>
   );
 }
@@ -39,63 +39,78 @@ export function AdminBookingForm({ bookableDates, initialDate, initialSlots }: P
 
   if (bookableDates.length === 0) {
     return (
-      <p className="banner-warn">
+      <p className="banner banner-warn">
         No open days in the next two weeks. Adjust shop hours to book ahead.
       </p>
     );
   }
 
   return (
-    <form action={adminCreateBookingAction} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-      <label>
-        <span className="label-mark">Customer phone</span>
-        <input
-          type="tel"
-          name="phone"
-          inputMode="numeric"
-          required
-          placeholder="081 234 5678"
-          pattern="[0-9\s-]*"
-          maxLength={15}
-          className="input-vintage numerals"
-        />
-      </label>
+    <form action={adminCreateBookingAction} className="card card-pad grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="field">
+        <label className="label" htmlFor="ab-phone">
+          Customer phone
+        </label>
+        <div className="input-prefix">
+          <span className="prefix">+66</span>
+          <input
+            id="ab-phone"
+            type="tel"
+            name="phone"
+            inputMode="numeric"
+            required
+            placeholder="81 234 5678"
+            pattern="[0-9\s-]*"
+            maxLength={15}
+            className="input tnum"
+          />
+        </div>
+      </div>
 
-      <label>
-        <span className="label-mark">Customer name</span>
+      <div className="field">
+        <label className="label" htmlFor="ab-name">
+          Customer name
+        </label>
         <input
+          id="ab-name"
           type="text"
           name="customerName"
           required
           minLength={NAME_MIN}
           maxLength={NAME_MAX}
           placeholder="Walk-in name"
-          className="input-vintage"
+          className="input"
         />
-      </label>
+      </div>
 
-      <label>
-        <span className="label-mark">Barber</span>
+      <div className="field">
+        <label className="label" htmlFor="ab-barber">
+          Barber
+        </label>
         <input
+          id="ab-barber"
           type="text"
           name="barberName"
           required
           minLength={NAME_MIN}
           maxLength={NAME_MAX}
           placeholder="Barber on the chair"
-          className="input-vintage"
+          className="input"
         />
-      </label>
+      </div>
 
-      <label>
-        <span className="label-mark">Date</span>
+      <div className="field">
+        <label className="label" htmlFor="ab-date">
+          Date
+        </label>
         <select
+          id="ab-date"
           value={date}
           onChange={(e) => {
             setDate(e.target.value);
             setSelectedSlot('');
           }}
-          className="input-vintage"
+          className="select"
         >
           {bookableDates.map((d) => (
             <option key={d} value={d}>
@@ -103,44 +118,37 @@ export function AdminBookingForm({ bookableDates, initialDate, initialSlots }: P
             </option>
           ))}
         </select>
-      </label>
+      </div>
 
       <div className="sm:col-span-2">
-        <span className="label-mark">Time</span>
+        <span className="label" style={{ display: 'block', marginBottom: 6 }}>
+          Time
+        </span>
         <input type="hidden" name="bookedOn" value={date} required />
         <input type="hidden" name="slotTime" value={selectedSlot} required />
 
         {slotsState.loading ? (
-          <p className="text-sm italic text-ink-faint">Loading slots…</p>
+          <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
+            Loading slots…
+          </p>
         ) : slotsState.list.length === 0 ? (
-          <p className="text-sm italic text-ink-faint">
+          <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
             {slotsState.error ?? 'No slots for this day.'}
           </p>
         ) : (
-          <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-6">
-            {slotsState.list.map((s) => {
-              const isPicked = selectedSlot === s.time;
-              return (
-                <button
-                  type="button"
-                  key={s.time}
-                  onClick={() => setSelectedSlot(s.time)}
-                  disabled={s.taken}
-                  aria-pressed={isPicked}
-                  aria-disabled={s.taken}
-                  className={[
-                    'numerals rounded-sm border px-2 py-2 text-sm transition-colors',
-                    s.taken
-                      ? 'cursor-not-allowed border-brass-pale/30 bg-paper-warm/50 text-ink-faint/60 line-through'
-                      : isPicked
-                        ? 'border-ink bg-ink text-paper'
-                        : 'border-brass-pale/70 bg-paper-warm text-ink hover:border-burgundy hover:text-burgundy',
-                  ].join(' ')}
-                >
-                  {s.time}
-                </button>
-              );
-            })}
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
+            {slotsState.list.map((s) => (
+              <button
+                type="button"
+                key={s.time}
+                onClick={() => setSelectedSlot(s.time)}
+                disabled={s.taken}
+                aria-pressed={selectedSlot === s.time}
+                className="slot"
+              >
+                {s.time}
+              </button>
+            ))}
           </div>
         )}
       </div>

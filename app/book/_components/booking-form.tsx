@@ -17,27 +17,29 @@ type Props = {
   initialSlots: SlotStatus[];
 };
 
-const WEEKDAY_HEADERS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
-
 function parseDateUTC(yyyyMmDd: string): Date {
   const [y, m, d] = yyyyMmDd.split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, d));
-}
-
-function formatMonth(date: string): string {
-  return parseDateUTC(date).toLocaleDateString('en-US', {
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
 }
 
 function dayNumber(date: string): number {
   return parseDateUTC(date).getUTCDate();
 }
 
-function weekdayIndex(date: string): number {
-  return parseDateUTC(date).getUTCDay();
+function weekdayShort(date: string): string {
+  return parseDateUTC(date).toLocaleDateString('en-US', {
+    weekday: 'short',
+    timeZone: 'UTC',
+  });
+}
+
+function formatPickedDate(date: string): string {
+  return parseDateUTC(date).toLocaleDateString('en-US', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  });
 }
 
 function BookingSubmitButton({ disabled }: { disabled: boolean }) {
@@ -47,10 +49,20 @@ function BookingSubmitButton({ disabled }: { disabled: boolean }) {
     <button
       type="submit"
       disabled={pending || disabled}
-      className="btn-primary mt-2"
+      className="btn btn-primary btn-block"
     >
-      {pending ? 'Holding the chair...' : 'Confirm reservation'}
-      <span aria-hidden="true">-&gt;</span>
+      {pending ? 'Holding the chair…' : 'Confirm booking'}
+      {!pending && (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M9 6l6 6-6 6"
+            stroke="currentColor"
+            strokeWidth="1.75"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      )}
     </button>
   );
 }
@@ -59,9 +71,6 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
   const [date, setDate] = useState<string>(initialDate ?? '');
   const [selectedSlot, setSelectedSlot] = useState<string>('');
 
-  // Server pre-rendered the first day's slots — let the hook skip the
-  // duplicate client fetch on mount, but re-fetch as soon as the user picks
-  // any other day.
   const slotsState = useSlots(date || null, {
     initial: initialSlots,
     skipInitialFor: initialDate,
@@ -72,13 +81,6 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
     [dayGrid],
   );
 
-  // Pad the grid so the first cell lands on its real weekday column.
-  const paddedGrid = useMemo<(DayCell | null)[]>(() => {
-    if (dayGrid.length === 0) return [];
-    const pad = weekdayIndex(dayGrid[0].date);
-    return [...Array.from({ length: pad }, () => null), ...dayGrid];
-  }, [dayGrid]);
-
   function pickDate(next: string) {
     if (!bookableSet.has(next)) return;
     setDate(next);
@@ -87,70 +89,39 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
 
   if (bookableSet.size === 0) {
     return (
-      <p className="banner-warn">
+      <p className="banner banner-warn mt-6">
         No open chairs in the next two weeks. Please check back later.
       </p>
     );
   }
 
-  const monthLabel = dayGrid.length > 0 ? formatMonth(dayGrid[0].date) : '';
   const slots = slotsState.list;
   const allTaken = slots.length > 0 && slots.every((s) => s.taken);
 
   return (
-    <form action={createBookingAction} className="grid grid-cols-1 gap-7">
-      <label>
-        <span className="label-mark">Phone</span>
-        <input
-          type="tel"
-          name="phone"
-          inputMode="numeric"
-          autoComplete="tel"
-          required
-          placeholder="081 234 5678"
-          pattern="[0-9\s-]*"
-          maxLength={15}
-          className="input-vintage numerals"
-        />
-        <span className="mt-1.5 block text-xs text-ink-faint">
-          Thai mobile — 10 digits starting 06, 08 or 09.
-        </span>
-      </label>
-
-      <label>
-        <span className="label-mark">Name</span>
-        <input
-          type="text"
-          name="customerName"
-          autoComplete="name"
-          required
-          minLength={NAME_MIN}
-          maxLength={NAME_MAX}
-          placeholder="Your name"
-          className="input-vintage"
-        />
-        <span className="mt-1.5 block text-xs text-ink-faint">
-          {NAME_MIN}–{NAME_MAX} characters.
-        </span>
-      </label>
-
-      <div>
-        <div className="flex items-baseline justify-between">
-          <span className="label-mark">Date</span>
-          <span className="text-xs text-ink-faint">{monthLabel}</span>
-        </div>
+    <form
+      action={createBookingAction}
+      className="mt-4 flex flex-1 flex-col gap-5 pb-4"
+    >
+      {/* Pick a date */}
+      <section>
+        <h2 className="text-[22px] font-semibold">Pick a date</h2>
+        <p className="mt-1 text-[13px]" style={{ color: 'var(--color-muted)' }}>
+          Asia/Bangkok · GMT+7
+        </p>
 
         <input type="hidden" name="bookedOn" value={date} required />
 
-        <div className="mt-3 grid grid-cols-7 gap-1 text-center text-[0.65rem] tracking-mark text-ink-faint">
-          {WEEKDAY_HEADERS.map((w, i) => (
-            <span key={i}>{w}</span>
-          ))}
-        </div>
-
-        <div className="mt-2 grid grid-cols-7 gap-1">
-          {paddedGrid.map((cell, i) => {
-            if (!cell) return <span key={`pad-${i}`} aria-hidden="true" />;
+        <div
+          className="mt-3 flex gap-2 overflow-x-auto pb-1"
+          style={{
+            marginLeft: -16,
+            marginRight: -16,
+            paddingLeft: 16,
+            paddingRight: 16,
+          }}
+        >
+          {dayGrid.map((cell) => {
             const isPicked = cell.date === date;
             const closed = !cell.open;
             return (
@@ -160,77 +131,186 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
                 onClick={() => pickDate(cell.date)}
                 disabled={closed}
                 aria-pressed={isPicked}
-                aria-disabled={closed}
                 aria-label={cell.date}
-                className={[
-                  'numerals h-10 rounded-sm border text-sm transition-colors',
-                  closed
-                    ? 'cursor-not-allowed border-brass-pale/30 bg-paper-warm/50 text-ink-faint/50 line-through'
-                    : isPicked
-                      ? 'border-ink bg-ink text-paper shadow-sm'
-                      : 'border-brass-pale/70 bg-paper-warm text-ink hover:border-burgundy hover:text-burgundy',
-                ].join(' ')}
+                className="date-chip"
               >
-                {dayNumber(cell.date)}
+                <span className="wd">{weekdayShort(cell.date)}</span>
+                <span className="d">{dayNumber(cell.date)}</span>
+                {closed && (
+                  <span
+                    style={{ fontSize: 10, color: 'var(--color-faint)' }}
+                  >
+                    closed
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
-        <span className="mt-2 block text-xs text-ink-faint">
-          Closed days are greyed out.
-        </span>
-      </div>
+      </section>
 
-      <div>
-        <span className="label-mark">Time</span>
+      {/* Pick a time */}
+      <section className="flex flex-col gap-3">
+        <div className="flex items-baseline justify-between">
+          <h2 className="text-[22px] font-semibold">Pick a time</h2>
+          {date && (
+            <span className="text-[13px]" style={{ color: 'var(--color-muted)' }}>
+              {formatPickedDate(date)}
+            </span>
+          )}
+        </div>
+
+        <div
+          className="flex gap-3.5 text-[12px]"
+          style={{ color: 'var(--color-muted)' }}
+        >
+          <span className="flex items-center gap-1.5">
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 3,
+                background: 'var(--color-surface)',
+                border: '1px solid var(--color-border-2)',
+              }}
+            />
+            Open
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 3,
+                background: 'var(--color-sunken)',
+                border: '1px solid var(--color-border)',
+              }}
+            />
+            Taken
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 3,
+                background: 'var(--color-accent)',
+              }}
+            />
+            Selected
+          </span>
+        </div>
+
         <input type="hidden" name="slotTime" value={selectedSlot} required />
 
         {!date ? (
-          <p className="text-sm italic text-ink-faint">Pick a date first.</p>
+          <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
+            Pick a date first.
+          </p>
         ) : slotsState.loading ? (
-          <p className="text-sm italic text-ink-faint">Checking the chair…</p>
+          <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
+            Checking the chair…
+          </p>
         ) : slots.length === 0 ? (
-          <p className="text-sm italic text-ink-faint">
+          <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
             {slotsState.error ?? 'No openings on this day.'}
           </p>
         ) : (
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-            {slots.map((s) => {
-              const isPicked = selectedSlot === s.time;
-              return (
-                <button
-                  type="button"
-                  key={s.time}
-                  onClick={() => setSelectedSlot(s.time)}
-                  disabled={s.taken}
-                  aria-pressed={isPicked}
-                  aria-disabled={s.taken}
-                  className={[
-                    'numerals rounded-sm border px-2 py-2.5 text-sm transition-all',
-                    s.taken
-                      ? 'cursor-not-allowed border-brass-pale/30 bg-paper-warm/50 text-ink-faint/60 line-through'
-                      : isPicked
-                        ? 'border-ink bg-ink text-paper shadow-sm'
-                        : 'border-brass-pale/70 bg-paper-warm text-ink hover:border-burgundy hover:text-burgundy',
-                  ].join(' ')}
-                >
-                  {s.time}
-                </button>
-              );
-            })}
+            {slots.map((s) => (
+              <button
+                type="button"
+                key={s.time}
+                onClick={() => setSelectedSlot(s.time)}
+                disabled={s.taken}
+                aria-pressed={selectedSlot === s.time}
+                className="slot"
+              >
+                {s.time}
+              </button>
+            ))}
           </div>
         )}
+
         {allTaken ? (
-          <p className="mt-2 text-xs text-burgundy">
+          <p className="text-[12px]" style={{ color: 'var(--color-danger)' }}>
             Every slot is taken on this day.
           </p>
         ) : null}
         {slotsState.error && slots.length === 0 ? (
-          <p className="mt-2 text-xs text-burgundy">{slotsState.error}</p>
+          <p className="text-[12px]" style={{ color: 'var(--color-danger)' }}>
+            {slotsState.error}
+          </p>
         ) : null}
-      </div>
+      </section>
 
-      <BookingSubmitButton disabled={!date || !selectedSlot} />
+      {/* Customer details */}
+      <section className="flex flex-col gap-4">
+        <h2 className="text-[17px] font-semibold">Your details</h2>
+
+        <div className="field">
+          <label className="label" htmlFor="customerName">
+            Name
+          </label>
+          <input
+            id="customerName"
+            type="text"
+            name="customerName"
+            autoComplete="name"
+            required
+            minLength={NAME_MIN}
+            maxLength={NAME_MAX}
+            placeholder="Your name"
+            className="input"
+          />
+          <span className="hint">
+            {NAME_MIN}–{NAME_MAX} characters.
+          </span>
+        </div>
+
+        <div className="field">
+          <label className="label" htmlFor="phone">
+            Phone
+          </label>
+          <div className="input-prefix">
+            <span className="prefix">+66</span>
+            <input
+              id="phone"
+              type="tel"
+              name="phone"
+              inputMode="numeric"
+              autoComplete="tel"
+              required
+              placeholder="81 234 5678"
+              pattern="[0-9\s-]*"
+              maxLength={15}
+              className="input tnum"
+            />
+          </div>
+          <span className="hint">
+            Thai mobile starting 06, 08 or 09.
+          </span>
+        </div>
+      </section>
+
+      {/* Summary + submit */}
+      <div
+        className="sticky bottom-0 mt-2 flex flex-col gap-2.5 pt-3"
+        style={{
+          background: 'var(--color-bg)',
+          borderTop: '1px solid var(--color-border)',
+        }}
+      >
+        {date && selectedSlot ? (
+          <div className="flex items-center justify-between text-[14px]">
+            <span style={{ color: 'var(--color-muted)' }}>Selected</span>
+            <span className="font-semibold tnum">
+              {formatPickedDate(date)} · {selectedSlot}
+            </span>
+          </div>
+        ) : null}
+        <BookingSubmitButton disabled={!date || !selectedSlot} />
+      </div>
     </form>
   );
 }

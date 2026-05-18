@@ -15,30 +15,26 @@ export async function generateMetadata({
   searchParams: Promise<{ id?: string }>;
 }): Promise<Metadata> {
   const { id } = await searchParams;
-  // The confirmation page is per-user state; don't index, but the title still
-  // helps when the user keeps the tab open.
   const booking = id ? await getCachedBookingById(id).catch(() => null) : null;
-  const title = booking ? `Reservation · ${booking.slotTime} ${booking.bookedOn}` : 'Reservation';
+  const title = booking
+    ? `Booking · ${booking.slotTime} ${booking.bookedOn}`
+    : 'Booking';
   return {
     title,
     robots: { index: false, follow: false },
   };
 }
 
-function formatDateLabel(yyyyMmDd: string): {
-  weekday: string;
-  day: string;
-  month: string;
-  year: string;
-} {
+function formatDateLabel(yyyyMmDd: string): string {
   const [y, m, d] = yyyyMmDd.split('-').map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
-  return {
-    weekday: dt.toLocaleDateString('en-US', { weekday: 'long', timeZone: 'UTC' }),
-    day: dt.toLocaleDateString('en-US', { day: '2-digit', timeZone: 'UTC' }),
-    month: dt.toLocaleDateString('en-US', { month: 'long', timeZone: 'UTC' }),
-    year: dt.toLocaleDateString('en-US', { year: 'numeric', timeZone: 'UTC' }),
-  };
+  return dt.toLocaleDateString('en-US', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 }
 
 export default async function BookingConfirmedPage({
@@ -52,75 +48,71 @@ export default async function BookingConfirmedPage({
   const booking = await getCachedBookingById(id);
   if (!booking) notFound();
 
-  const date = formatDateLabel(booking.bookedOn);
   const ref = booking.id.slice(0, 8).toUpperCase();
 
   return (
-    <main className="mx-auto w-full max-w-xl px-6 py-14 sm:py-20">
-      <p className="reveal reveal-d1 tracking-mark text-center text-xs text-brass">
-        № 03 — Reservation confirmed
-      </p>
+    <main className="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 pt-8 pb-10 sm:px-6">
+      <div className="flex flex-col items-center gap-3 text-center">
+        <div
+          className="flex h-12 w-12 items-center justify-center rounded-full"
+          style={{ background: 'var(--color-accent-3)' }}
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M5 12l5 5 9-11"
+              stroke="var(--color-accent)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+        <h1 className="text-[24px] font-semibold">Booking confirmed</h1>
+        <p className="text-[14px]" style={{ color: 'var(--color-muted)' }}>
+          We&apos;ll hold your chair. Keep your phone number to look it up later.
+        </p>
+      </div>
 
-      <h1 className="reveal reveal-d2 font-display mt-4 text-center text-4xl text-ink sm:text-5xl">
-        Your chair is <em className="font-display italic text-burgundy not-italic">held.</em>
-      </h1>
+      <section className="card card-pad mt-7 flex flex-col gap-4">
+        <div className="flex items-baseline justify-between">
+          <span
+            className="text-[12px] font-semibold uppercase"
+            style={{ color: 'var(--color-muted)', letterSpacing: '0.06em' }}
+          >
+            Booking
+          </span>
+          <span className="badge badge-confirmed">
+            <span className="badge-dot" />
+            Confirmed
+          </span>
+        </div>
 
-      {/* Ticket stub */}
-      <article className="reveal reveal-d3 ticket mt-12 px-8 py-9 sm:px-12">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="tracking-mark text-[0.62rem] text-ink-faint">Reservation</p>
-            <p className="font-display numerals mt-1 text-xl text-ink">#{ref}</p>
+        <div>
+          <div className="text-[22px] font-semibold tnum" style={{ letterSpacing: '-0.01em' }}>
+            {formatDateLabel(booking.bookedOn)} · {booking.slotTime}
           </div>
-          <div className="text-right">
-            <p className="tracking-mark text-[0.62rem] text-ink-faint">The Bangkok Barber</p>
-            <p className="font-display mt-1 text-sm italic text-ink-soft">est. MMXXVI</p>
+          <div className="mt-1 text-[13px]" style={{ color: 'var(--color-muted)' }}>
+            30 min · Asia / Bangkok
           </div>
         </div>
 
-        <div className="ornament-rule my-8 text-xs">
-          <span aria-hidden="true">✦</span>
-        </div>
+        <div className="divider" />
 
-        <div className="text-center">
-          <p className="tracking-mark text-[0.62rem] text-brass">{date.weekday}</p>
-          <p className="font-display numerals mt-2 flex items-baseline justify-center gap-3 text-ink">
-            <span className="text-7xl leading-none">{date.day}</span>
-            <span className="flex flex-col items-start text-left">
-              <span className="text-2xl">{date.month}</span>
-              <span className="numerals text-base text-ink-soft">{date.year}</span>
-            </span>
-          </p>
-
-          <p className="font-display numerals mt-8 text-5xl text-burgundy">
-            {booking.slotTime}
-          </p>
-          <p className="tracking-mark mt-1 text-[0.62rem] text-ink-faint">
-            Asia / Bangkok
-          </p>
-        </div>
-
-        <div className="ornament-rule my-8 text-xs">
-          <span aria-hidden="true">✦</span>
-        </div>
-
-        <dl className="grid grid-cols-2 gap-3 text-sm">
-          <dt className="tracking-mark text-[0.62rem] text-ink-faint">Name</dt>
-          <dd className="text-right font-medium text-ink">{booking.customerName}</dd>
-          <dt className="tracking-mark text-[0.62rem] text-ink-faint">Phone</dt>
-          <dd className="text-right font-medium text-ink numerals">{booking.phone}</dd>
+        <dl className="grid grid-cols-[80px_1fr] gap-y-2 text-[14px]">
+          <dt style={{ color: 'var(--color-muted)' }}>Name</dt>
+          <dd className="text-right font-medium">{booking.customerName}</dd>
+          <dt style={{ color: 'var(--color-muted)' }}>Phone</dt>
+          <dd className="text-right font-medium tnum">{booking.phone}</dd>
+          <dt style={{ color: 'var(--color-muted)' }}>Ref</dt>
+          <dd className="text-right font-medium mono text-[13px]">#{ref}</dd>
         </dl>
-      </article>
+      </section>
 
-      <p className="mt-8 text-center text-sm italic text-ink-soft">
-        Keep your phone number — that&apos;s how you&apos;ll find this booking again.
-      </p>
-
-      <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center sm:gap-5">
-        <Link href="/book" className="btn-ghost">
-          Book another
+      <div className="mt-6 flex flex-col gap-2.5">
+        <Link href="/lookup" className="btn btn-secondary btn-block">
+          View my bookings
         </Link>
-        <Link href="/" className="btn-link">
+        <Link href="/" className="btn btn-ghost btn-block">
           Back to home
         </Link>
       </div>
