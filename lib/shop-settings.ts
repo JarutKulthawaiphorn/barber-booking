@@ -1,10 +1,15 @@
+import 'server-only';
+
+import { unstable_cache } from 'next/cache';
+
 import { getSupabase } from './supabase/server';
 import { todayInBangkok } from './timezone';
 
 export type ShopSettings = {
   openTime: string;
   closeTime: string;
-  weeklyClosedWeekday: number;
+  /** 0 = Sunday … 6 = Saturday. `null` means the shop is open every day. */
+  weeklyClosedWeekday: number | null;
 };
 
 export type ClosedDate = {
@@ -12,6 +17,13 @@ export type ClosedDate = {
   closedOn: string;
   note: string | null;
 };
+
+/**
+ * Cache tags. Mutations call `revalidateTag(...)` with these to flush all
+ * cached reads in one call instead of hand-rolling per-path invalidations.
+ */
+export const SHOP_SETTINGS_TAG = 'shop-settings';
+export const CLOSED_DATES_TAG = 'closed-dates';
 
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -36,12 +48,14 @@ export function validateShopSettings(input: ShopSettings): void {
   if (close - open < 30) {
     throw new Error('Shop must be open for at least 30 minutes');
   }
-  if (
-    !Number.isInteger(input.weeklyClosedWeekday) ||
-    input.weeklyClosedWeekday < 0 ||
-    input.weeklyClosedWeekday > 6
-  ) {
-    throw new Error('weeklyClosedWeekday must be an integer between 0 and 6');
+  if (input.weeklyClosedWeekday !== null) {
+    if (
+      !Number.isInteger(input.weeklyClosedWeekday) ||
+      input.weeklyClosedWeekday < 0 ||
+      input.weeklyClosedWeekday > 6
+    ) {
+      throw new Error('weeklyClosedWeekday must be an integer between 0 and 6, or null');
+    }
   }
 }
 
@@ -54,7 +68,15 @@ export function validateClosedDate(closedOn: string, today: string = todayInBang
   }
 }
 
-export async function getShopSettings(): Promise<ShopSettings> {
+// ---------------------------------------------------------------------------
+// Cached reads
+//
+// Both reads are tag-cached: cheap on read (in-process across requests),
+// flushed instantly on write via `revalidateTag(SHOP_SETTINGS_TAG)` /
+// `revalidateTag(CLOSED_DATES_TAG)` from the admin server actions.
+// ---------------------------------------------------------------------------
+
+async function loadShopSettings(): Promise<ShopSettings> {
   const { data, error } = await getSupabase()
     .from('shop_settings')
     .select('open_time, close_time, weekly_closed_weekday')
@@ -68,29 +90,17 @@ export async function getShopSettings(): Promise<ShopSettings> {
   return {
     openTime: String(data.open_time).slice(0, 5),
     closeTime: String(data.close_time).slice(0, 5),
-    weeklyClosedWeekday: data.weekly_closed_weekday as number,
+    weeklyClosedWeekday: data.weekly_closed_weekday as number | null,
   };
 }
 
-export async function updateShopSettings(input: ShopSettings): Promise<void> {
-  validateShopSettings(input);
-  const { error } = await getSupabase()
-    .from('shop_settings')
-    .update({
-      open_time: input.openTime,
-      close_time: input.closeTime,
-      weekly_closed_weekday: input.weeklyClosedWeekday,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', 1);
+export const getShopSettings = unstable_cache(
+  loadShopSettings,
+  ['shop-settings:v1'],
+  { tags: [SHOP_SETTINGS_TAG] },
+);
 
-  if (error) throw new Error(`Failed to update shop settings: ${error.message}`);
-}
-
-export async function listClosedDates(opts?: {
-  from?: string;
-  to?: string;
-}): Promise<ClosedDate[]> {
+async function loadClosedDates(opts?: { from?: string; to?: string }): Promise<ClosedDate[]> {
   let query = getSupabase()
     .from('closed_dates')
     .select('id, closed_on, note')
@@ -107,6 +117,36 @@ export async function listClosedDates(opts?: {
     closedOn: row.closed_on as string,
     note: (row.note as string | null) ?? null,
   }));
+}
+
+/**
+ * `from`/`to` are captured as part of the cache key, so different windows get
+ * independent cache entries. `unstable_cache` does not see closures, so the
+ * args are passed through verbatim and serialise into the key.
+ */
+export const listClosedDates = unstable_cache(
+  loadClosedDates,
+  ['closed-dates:v1'],
+  { tags: [CLOSED_DATES_TAG] },
+);
+
+// ---------------------------------------------------------------------------
+// Mutations (uncached; tagged caches above are invalidated by server actions)
+// ---------------------------------------------------------------------------
+
+export async function updateShopSettings(input: ShopSettings): Promise<void> {
+  validateShopSettings(input);
+  const { error } = await getSupabase()
+    .from('shop_settings')
+    .update({
+      open_time: input.openTime,
+      close_time: input.closeTime,
+      weekly_closed_weekday: input.weeklyClosedWeekday,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', 1);
+
+  if (error) throw new Error(`Failed to update shop settings: ${error.message}`);
 }
 
 export async function addClosedDate(input: {

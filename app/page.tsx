@@ -1,4 +1,60 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
+
+import { getShopSettings } from '@/lib/shop-settings';
+
+const WEEKDAY_NAMES = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+] as const;
+
+/**
+ * Render the open-day range as e.g. "Tuesday through Sunday" when one weekday
+ * is closed, or "Every day" when the shop never closes weekly.
+ */
+function formatOpenDayRange(weeklyClosed: number | null): string {
+  if (weeklyClosed === null) return 'Every day';
+  const start = (weeklyClosed + 1) % 7;
+  const end = (weeklyClosed + 6) % 7;
+  return `${WEEKDAY_NAMES[start]} through ${WEEKDAY_NAMES[end]}`;
+}
+
+/**
+ * Async island for the dynamic "Hours" tile. Hoisted into its own component so
+ * the rest of the home page renders from the static shell immediately and this
+ * block streams in once `getShopSettings()` resolves from the tagged cache.
+ *
+ * Replaces the old `dynamic = 'force-dynamic'` on the whole page — only this
+ * tile actually needs the data, and the cache means most loads serve from
+ * memory anyway.
+ */
+async function HoursTile() {
+  const settings = await getShopSettings();
+  return (
+    <>
+      <p className="font-display mt-2 text-2xl text-ink numerals">
+        {settings.openTime} — {settings.closeTime}
+      </p>
+      <p className="mt-1 text-sm text-ink-mid">
+        {formatOpenDayRange(settings.weeklyClosedWeekday)}
+      </p>
+    </>
+  );
+}
+
+function HoursTileFallback() {
+  return (
+    <>
+      <p className="font-display mt-2 text-2xl text-ink-faint numerals">— : — — — : —</p>
+      <p className="mt-1 text-sm text-ink-faint italic">Loading…</p>
+    </>
+  );
+}
 
 export default function HomePage() {
   return (
@@ -61,8 +117,9 @@ export default function HomePage() {
       <section className="reveal reveal-d6 mt-20 grid grid-cols-1 gap-8 border-t border-brass-pale/60 pt-10 sm:mt-28 sm:grid-cols-3">
         <div>
           <p className="tracking-mark text-[0.65rem] text-brass">Hours</p>
-          <p className="font-display mt-2 text-2xl text-ink numerals">09:00 — 19:00</p>
-          <p className="mt-1 text-sm text-ink-mid">Tuesday through Sunday</p>
+          <Suspense fallback={<HoursTileFallback />}>
+            <HoursTile />
+          </Suspense>
         </div>
         <div>
           <p className="tracking-mark text-[0.65rem] text-brass">Service</p>

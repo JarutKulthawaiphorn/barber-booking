@@ -7,8 +7,11 @@ import {
   getWeekday,
   listBookableDates,
   normalizePhone,
+  slotsWithStatus,
+  validateBarberName,
+  validateCustomerName,
   validatePhone,
-} from './booking';
+} from './booking-domain';
 import type { ClosedDate, ShopSettings } from './shop-settings';
 
 describe('normalizePhone', () => {
@@ -151,12 +154,23 @@ describe('listBookableDates', () => {
 
   it('respects a custom lookAheadDays', () => {
     const dates = listBookableDates({
-      settings: { ...settings, weeklyClosedWeekday: 7 as unknown as number }, // never matches
+      settings: { ...settings, weeklyClosedWeekday: null }, // open every day
       closedDates: [],
       today: '2026-05-17',
       lookAheadDays: 3,
     });
     expect(dates).toEqual(['2026-05-17', '2026-05-18', '2026-05-19']);
+  });
+
+  it('treats null weeklyClosedWeekday as open every day', () => {
+    const dates = listBookableDates({
+      settings: { ...settings, weeklyClosedWeekday: null },
+      closedDates: [],
+      today: '2026-05-17',
+      lookAheadDays: 14,
+    });
+    expect(dates).toHaveLength(14);
+    expect(dates).toContain('2026-05-18'); // Monday no longer excluded
   });
 });
 
@@ -236,5 +250,68 @@ describe('availableSlots', () => {
         today: '2026-05-17',
       }),
     ).toEqual([]);
+  });
+});
+
+describe('slotsWithStatus', () => {
+  const settings: ShopSettings = {
+    openTime: '09:00',
+    closeTime: '10:30',
+    weeklyClosedWeekday: 1,
+  };
+
+  it('marks taken slots as disabled instead of hiding them', () => {
+    const slots = slotsWithStatus({
+      settings,
+      closedDates: [],
+      existingBookings: [{ slotTime: '09:30' }],
+      date: '2026-05-17',
+      today: '2026-05-17',
+    });
+    expect(slots).toEqual([
+      { time: '09:00', taken: false },
+      { time: '09:30', taken: true },
+      { time: '10:00', taken: false },
+    ]);
+  });
+
+  it('returns empty for a closed date', () => {
+    expect(
+      slotsWithStatus({
+        settings,
+        closedDates: [],
+        existingBookings: [],
+        date: '2026-05-18', // Monday
+        today: '2026-05-17',
+      }),
+    ).toEqual([]);
+  });
+});
+
+describe('validateCustomerName', () => {
+  it('trims and collapses whitespace', () => {
+    expect(validateCustomerName('  John   Doe  ')).toBe('John Doe');
+  });
+
+  it('rejects under 2 chars after trim', () => {
+    expect(() => validateCustomerName(' a ')).toThrow();
+    expect(() => validateCustomerName('')).toThrow();
+  });
+
+  it('rejects over 24 chars', () => {
+    expect(() => validateCustomerName('a'.repeat(25))).toThrow();
+  });
+
+  it('accepts a 24-char name', () => {
+    const name = 'a'.repeat(24);
+    expect(validateCustomerName(name)).toBe(name);
+  });
+});
+
+describe('validateBarberName', () => {
+  it('uses the same 2–24 char rule', () => {
+    expect(validateBarberName(' Som ')).toBe('Som');
+    expect(() => validateBarberName('a')).toThrow();
+    expect(() => validateBarberName('a'.repeat(25))).toThrow();
   });
 });

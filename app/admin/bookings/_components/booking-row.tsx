@@ -1,28 +1,24 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { type FormEvent } from 'react';
 
 import { adminCancelBookingAction } from '../actions';
-
-function maskPhone(phone: string): string {
-  // 0812345678 → 081-XXX-5678
-  if (phone.length !== 10) return phone;
-  return `${phone.slice(0, 3)}-XXX-${phone.slice(6)}`;
-}
 
 export function BookingRow({
   id,
   slotTime,
   phone,
+  customerName,
+  barberName,
   date,
 }: {
   id: string;
   slotTime: string;
   phone: string;
+  customerName: string;
+  barberName: string | null;
   date: string;
 }) {
-  const [revealed, setRevealed] = useState(false);
-
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     if (!window.confirm(`Cancel the ${slotTime} booking? This cannot be undone.`)) {
       e.preventDefault();
@@ -33,17 +29,13 @@ export function BookingRow({
     <li className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-5">
       <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
         <span className="font-display numerals text-3xl text-burgundy">{slotTime}</span>
-        <span className="numerals text-sm text-ink-soft">
-          {revealed ? phone : maskPhone(phone)}
-        </span>
-        <button
-          type="button"
-          onClick={() => setRevealed((v) => !v)}
-          className="tracking-mark text-[0.65rem] text-ink-faint underline-offset-4 hover:text-burgundy hover:underline"
-          aria-label={revealed ? 'Hide phone number' : 'Show phone number'}
-        >
-          {revealed ? 'Hide' : 'Show'}
-        </button>
+        <span className="text-base text-ink">{customerName}</span>
+        <span className="numerals text-sm text-ink-soft">{phone.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')}</span>
+        {barberName ? (
+          <span className="rounded-sm border border-brass-pale/70 bg-paper-warm px-2 py-0.5 text-[0.7rem] tracking-mark text-brass">
+            Barber · {barberName}
+          </span>
+        ) : null}
       </div>
       <form action={adminCancelBookingAction} onSubmit={handleSubmit}>
         <input type="hidden" name="id" value={id} />

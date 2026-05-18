@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { requireAdmin } from '@/lib/auth';
-import { adminCancelBooking } from '@/lib/booking';
+import { adminCancelBooking, adminCreateBooking } from '@/lib/booking';
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : 'Something went wrong';
@@ -13,6 +13,25 @@ function errorMessage(err: unknown): string {
 function redirectBack(date: string, params: Record<string, string>): never {
   const search = new URLSearchParams({ date, ...params });
   redirect(`/admin/bookings?${search.toString()}`);
+}
+
+export async function adminCreateBookingAction(formData: FormData): Promise<void> {
+  await requireAdmin();
+
+  const phone = String(formData.get('phone') ?? '');
+  const customerName = String(formData.get('customerName') ?? '');
+  const barberName = String(formData.get('barberName') ?? '');
+  const bookedOn = String(formData.get('bookedOn') ?? '');
+  const slotTime = String(formData.get('slotTime') ?? '');
+
+  try {
+    await adminCreateBooking({ phone, customerName, barberName, bookedOn, slotTime });
+  } catch (err) {
+    redirectBack(bookedOn, { error: errorMessage(err) });
+  }
+
+  revalidatePath('/admin/bookings');
+  redirectBack(bookedOn, { ok: 'Booking added' });
 }
 
 export async function adminCancelBookingAction(formData: FormData): Promise<void> {

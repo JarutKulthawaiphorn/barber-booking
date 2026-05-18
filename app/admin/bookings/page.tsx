@@ -1,11 +1,20 @@
+import type { Metadata } from 'next';
+
 import { requireAdmin } from '@/lib/auth';
-import { listBookingsOnDate } from '@/lib/booking';
+import { listBookableDates, listBookingsOnDate, slotsWithStatus } from '@/lib/booking';
+import { getShopSettings, listClosedDates } from '@/lib/shop-settings';
 import { todayInBangkok } from '@/lib/timezone';
 
 import { AdminHeader } from '../_components/admin-header';
+import { AdminBookingForm } from './_components/admin-booking-form';
 import { BookingRow } from './_components/booking-row';
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+export const metadata: Metadata = {
+  title: 'Admin - Bookings',
+  robots: { index: false, follow: false },
+};
 
 function formatDateLabel(yyyyMmDd: string): {
   weekday: string;
@@ -34,7 +43,28 @@ export default async function AdminBookingsPage({
   const date = params.date && DATE_RE.test(params.date) ? params.date : today;
   const label = formatDateLabel(date);
 
-  const bookings = await listBookingsOnDate(date);
+  const [bookings, settings, closedDates] = await Promise.all([
+    listBookingsOnDate(date),
+    getShopSettings(),
+    listClosedDates({ from: today }),
+  ]);
+  const bookableDates = listBookableDates({ settings, closedDates, today });
+  const initialBookingDate = bookableDates.includes(date)
+    ? date
+    : (bookableDates[0] ?? '');
+  const initialSlotBookings =
+    initialBookingDate && initialBookingDate !== date
+      ? await listBookingsOnDate(initialBookingDate)
+      : bookings;
+  const initialSlots = initialBookingDate
+    ? slotsWithStatus({
+        settings,
+        closedDates,
+        existingBookings: initialSlotBookings,
+        date: initialBookingDate,
+        today,
+      })
+    : [];
 
   return (
     <main className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
@@ -99,6 +129,8 @@ export default async function AdminBookingsPage({
                 id={b.id}
                 slotTime={b.slotTime}
                 phone={b.phone}
+                customerName={b.customerName}
+                barberName={b.barberName}
                 date={date}
               />
             ))}
@@ -108,6 +140,23 @@ export default async function AdminBookingsPage({
             The chair is free all day.
           </p>
         )}
+      </section>
+
+      <section className="reveal reveal-d4 mt-16">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-display text-2xl text-ink">Add booking</h2>
+          <p className="tracking-mark text-[0.65rem] text-brass">Walk-in or phone</p>
+        </div>
+        <p className="mt-2 text-sm text-ink-soft">
+          The barber name will appear on the booking card.
+        </p>
+        <div className="mt-6">
+          <AdminBookingForm
+            bookableDates={bookableDates}
+            initialDate={initialBookingDate}
+            initialSlots={initialSlots}
+          />
+        </div>
       </section>
     </main>
   );

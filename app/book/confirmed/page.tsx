@@ -1,12 +1,28 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { cache } from 'react';
 
 import { getBookingById } from '@/lib/booking';
 
-function maskPhone(phone: string): string {
-  // 0812345678 → 081-XXX-5678
-  if (phone.length !== 10) return phone;
-  return `${phone.slice(0, 3)}-XXX-${phone.slice(6)}`;
+export const dynamic = 'force-dynamic';
+
+const getCachedBookingById = cache(getBookingById);
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ id?: string }>;
+}): Promise<Metadata> {
+  const { id } = await searchParams;
+  // The confirmation page is per-user state; don't index, but the title still
+  // helps when the user keeps the tab open.
+  const booking = id ? await getCachedBookingById(id).catch(() => null) : null;
+  const title = booking ? `Reservation · ${booking.slotTime} ${booking.bookedOn}` : 'Reservation';
+  return {
+    title,
+    robots: { index: false, follow: false },
+  };
 }
 
 function formatDateLabel(yyyyMmDd: string): {
@@ -33,7 +49,7 @@ export default async function BookingConfirmedPage({
   const { id } = await searchParams;
   if (!id) notFound();
 
-  const booking = await getBookingById(id);
+  const booking = await getCachedBookingById(id);
   if (!booking) notFound();
 
   const date = formatDateLabel(booking.bookedOn);
@@ -88,9 +104,11 @@ export default async function BookingConfirmedPage({
           <span aria-hidden="true">✦</span>
         </div>
 
-        <dl className="flex items-center justify-between text-sm">
+        <dl className="grid grid-cols-2 gap-3 text-sm">
+          <dt className="tracking-mark text-[0.62rem] text-ink-faint">Name</dt>
+          <dd className="text-right font-medium text-ink">{booking.customerName}</dd>
           <dt className="tracking-mark text-[0.62rem] text-ink-faint">Phone</dt>
-          <dd className="numerals font-medium text-ink">{maskPhone(booking.phone)}</dd>
+          <dd className="text-right font-medium text-ink numerals">{booking.phone}</dd>
         </dl>
       </article>
 

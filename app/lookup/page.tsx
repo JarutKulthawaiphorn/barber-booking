@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { getBookingsByPhone, type Booking } from '@/lib/booking';
@@ -5,10 +6,10 @@ import { todayInBangkok } from '@/lib/timezone';
 
 import { cancelBookingAction, lookupBookingsAction } from './actions';
 
-function maskPhone(phone: string): string {
-  if (phone.length !== 10) return phone;
-  return `${phone.slice(0, 3)}-XXX-${phone.slice(6)}`;
-}
+export const metadata: Metadata = {
+  title: 'Find your booking',
+  robots: { index: false, follow: false },
+};
 
 function formatDateLabel(yyyyMmDd: string): string {
   const [y, m, d] = yyyyMmDd.split('-').map(Number);
@@ -141,8 +142,11 @@ export default async function LookupPage({
                         <span aria-hidden="true">✦</span>
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <span className="numerals text-sm text-ink-soft">{maskPhone(b.phone)}</span>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex flex-col">
+                          <span className="text-sm text-ink">{b.customerName}</span>
+                          <span className="numerals text-xs text-ink-soft">{b.phone}</span>
+                        </div>
                         <form action={cancelBookingAction}>
                           <input type="hidden" name="id" value={b.id} />
                           <input type="hidden" name="phone" value={b.phone} />

@@ -1,14 +1,26 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import {
-  availableSlots,
+  LOOK_AHEAD_DAYS,
+  addDays,
   listBookableDates,
   listBookingsOnDate,
+  slotsWithStatus,
+  type SlotStatus,
 } from '@/lib/booking';
 import { getShopSettings, listClosedDates } from '@/lib/shop-settings';
 import { todayInBangkok } from '@/lib/timezone';
 
 import { BookingForm } from './_components/booking-form';
+
+export const metadata: Metadata = {
+  title: 'Reserve a chair',
+  description:
+    'Pick a 30-minute slot at The Bangkok Barber. Two-week booking window.',
+};
+
+export const dynamic = 'force-dynamic';
 
 export default async function BookPage({
   searchParams,
@@ -26,8 +38,8 @@ export default async function BookPage({
   const bookableDates = listBookableDates({ settings, closedDates, today });
   const initialDate = bookableDates[0] ?? null;
   const initialBookings = initialDate ? await listBookingsOnDate(initialDate) : [];
-  const initialSlots = initialDate
-    ? availableSlots({
+  const initialSlots: SlotStatus[] = initialDate
+    ? slotsWithStatus({
         settings,
         closedDates,
         existingBookings: initialBookings,
@@ -35,6 +47,13 @@ export default async function BookPage({
         today,
       })
     : [];
+
+  // Full 14-day window so the day-grid picker can render every day with the
+  // right enabled/disabled state.
+  const dayGrid: string[] = Array.from({ length: LOOK_AHEAD_DAYS }, (_, i) =>
+    addDays(today, i),
+  );
+  const bookableSet = new Set(bookableDates);
 
   return (
     <main className="mx-auto w-full max-w-2xl px-6 py-12 sm:py-16">
@@ -60,7 +79,7 @@ export default async function BookPage({
 
       <section className="reveal reveal-d3 corner-brackets card-paper mt-10 p-7 sm:p-10">
         <BookingForm
-          bookableDates={bookableDates}
+          dayGrid={dayGrid.map((d) => ({ date: d, open: bookableSet.has(d) }))}
           initialDate={initialDate}
           initialSlots={initialSlots}
         />

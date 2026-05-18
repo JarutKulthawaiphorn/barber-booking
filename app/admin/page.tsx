@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+
 import { requireAdmin } from '@/lib/auth';
 import { getShopSettings, listClosedDates } from '@/lib/shop-settings';
 import { todayInBangkok } from '@/lib/timezone';
@@ -9,6 +11,10 @@ import {
   updateSettingsAction,
 } from './actions';
 
+export const metadata: Metadata = {
+  title: 'Admin - Settings',
+  robots: { index: false, follow: false },
+};
 const WEEKDAY_NAMES = [
   'Sunday',
   'Monday',
@@ -83,9 +89,10 @@ export default async function AdminPage({
             <span className="label-mark">Closed every</span>
             <select
               name="weeklyClosedWeekday"
-              defaultValue={settings.weeklyClosedWeekday}
+              defaultValue={settings.weeklyClosedWeekday ?? -1}
               className="input-vintage"
             >
+              <option value={-1}>Open every day</option>
               {WEEKDAY_NAMES.map((name, i) => (
                 <option key={name} value={i}>
                   {name}

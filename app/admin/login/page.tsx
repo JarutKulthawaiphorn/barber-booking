@@ -1,6 +1,15 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+
+import { getAdminSession } from '@/lib/auth';
 
 import { loginAction } from './actions';
+
+export const metadata: Metadata = {
+  title: 'Staff login',
+  robots: { index: false, follow: false },
+};
 
 const ERROR_MESSAGES: Record<string, string> = {
   missing: 'Username and password are required.',
@@ -12,6 +21,10 @@ export default async function AdminLoginPage({
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
+  if (await getAdminSession()) {
+    redirect('/admin/bookings');
+  }
+
   const params = await searchParams;
   const error = params.error ? (ERROR_MESSAGES[params.error] ?? 'Login failed.') : null;
 

@@ -45,6 +45,12 @@ describe('validateShopSettings', () => {
     expect(() => validateShopSettings({ ...valid, weeklyClosedWeekday: 7 })).toThrow();
     expect(() => validateShopSettings({ ...valid, weeklyClosedWeekday: 1.5 })).toThrow();
   });
+
+  it('accepts null weeklyClosedWeekday (open every day)', () => {
+    expect(() =>
+      validateShopSettings({ ...valid, weeklyClosedWeekday: null }),
+    ).not.toThrow();
+  });
 });
 
 describe('validateClosedDate', () => {
