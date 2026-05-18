@@ -30,16 +30,16 @@ export function BookingRow({
   }
 
   return (
-    <li className="flex items-center justify-between gap-4 px-4 py-3 text-sm">
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-        <span className="font-medium text-zinc-900 dark:text-zinc-50">{slotTime}</span>
-        <span className="font-mono text-zinc-600 dark:text-zinc-400">
+    <li className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-5">
+      <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
+        <span className="font-display numerals text-3xl text-burgundy">{slotTime}</span>
+        <span className="numerals text-sm text-ink-soft">
           {revealed ? phone : maskPhone(phone)}
         </span>
         <button
           type="button"
           onClick={() => setRevealed((v) => !v)}
-          className="text-xs text-zinc-500 underline-offset-4 hover:underline dark:text-zinc-400"
+          className="tracking-mark text-[0.65rem] text-ink-faint underline-offset-4 hover:text-burgundy hover:underline"
           aria-label={revealed ? 'Hide phone number' : 'Show phone number'}
         >
           {revealed ? 'Hide' : 'Show'}
@@ -50,7 +50,7 @@ export function BookingRow({
         <input type="hidden" name="date" value={date} />
         <button
           type="submit"
-          className="text-sm text-red-600 hover:underline dark:text-red-400"
+          className="tracking-mark text-[0.7rem] text-burgundy underline-offset-4 hover:underline"
         >
           Cancel
         </button>

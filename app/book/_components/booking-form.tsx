@@ -16,12 +16,6 @@ type SlotsState = {
   error: string | null;
 };
 
-const inputClass =
-  'mt-2 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50';
-
-const primaryButtonClass =
-  'rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200';
-
 export function BookingForm({ bookableDates, initialDate, initialSlots }: Props) {
   const [date, setDate] = useState<string>(initialDate ?? '');
   const [slotsState, setSlotsState] = useState<SlotsState>({
@@ -29,9 +23,18 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
     list: initialSlots,
     error: null,
   });
+  const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [submitting, startSubmit] = useTransition();
 
   const isClosedDate = date !== '' && !bookableDates.includes(date);
+
+  function handleDateChange(next: string) {
+    setDate(next);
+    setSelectedSlot('');
+    if (next && next !== initialDate && bookableDates.includes(next)) {
+      setSlotsState({ loading: true, list: [], error: null });
+    }
+  }
 
   useEffect(() => {
     if (date === initialDate || !date) return;
@@ -63,8 +66,8 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
 
   if (bookableDates.length === 0) {
     return (
-      <p className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:bg-amber-950 dark:text-amber-200">
-        No open days in the next two weeks. Please check back later.
+      <p className="banner-warn">
+        No open chairs in the next two weeks. Please check back later.
       </p>
     );
   }
@@ -75,28 +78,28 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
   return (
     <form
       action={(formData) => startSubmit(() => createBookingAction(formData))}
-      className="grid grid-cols-1 gap-4"
+      className="grid grid-cols-1 gap-7"
     >
-      <label className="text-sm">
-        <span className="block font-medium text-zinc-700 dark:text-zinc-300">Phone</span>
+      <label>
+        <span className="label-mark">Phone</span>
         <input
           type="tel"
           name="phone"
           inputMode="numeric"
           autoComplete="tel"
           required
-          placeholder="0812345678"
+          placeholder="081 234 5678"
           pattern="[0-9\s-]*"
           maxLength={15}
-          className={inputClass}
+          className="input-vintage numerals"
         />
-        <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
-          Thai mobile only — 10 digits starting with 06, 08, or 09.
+        <span className="mt-1.5 block text-xs text-ink-faint">
+          Thai mobile — 10 digits starting 06, 08 or 09.
         </span>
       </label>
 
-      <label className="text-sm">
-        <span className="block font-medium text-zinc-700 dark:text-zinc-300">Date</span>
+      <label>
+        <span className="label-mark">Date</span>
         <input
           type="date"
           name="bookedOn"
@@ -104,49 +107,61 @@ export function BookingForm({ bookableDates, initialDate, initialSlots }: Props)
           value={date}
           min={bookableDates[0]}
           max={bookableDates[bookableDates.length - 1]}
-          onChange={(e) => setDate(e.target.value)}
-          className={inputClass}
+          onChange={(e) => handleDateChange(e.target.value)}
+          className="input-vintage numerals"
         />
-      </label>
-
-      <label className="text-sm">
-        <span className="block font-medium text-zinc-700 dark:text-zinc-300">Time</span>
-        <select
-          name="slotTime"
-          required
-          disabled={slots.length === 0}
-          defaultValue=""
-          className={inputClass}
-          key={`${date}-${slots.join(',')}`}
-        >
-          <option value="" disabled>
-            {isClosedDate
-              ? 'Closed'
-              : slots.length === 0
-                ? 'No slots available'
-                : 'Pick a time'}
-          </option>
-          {slots.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
         {isClosedDate ? (
-          <span className="mt-1 block text-xs text-amber-700 dark:text-amber-300">
+          <span className="mt-1.5 block text-xs text-brass">
             Shop is closed on this date.
           </span>
-        ) : slotsError ? (
-          <span className="mt-1 block text-xs text-red-600 dark:text-red-400">{slotsError}</span>
         ) : null}
       </label>
 
+      <div>
+        <span className="label-mark">Time</span>
+        <input type="hidden" name="slotTime" value={selectedSlot} required />
+
+        {slotsState.loading ? (
+          <p className="text-sm italic text-ink-faint">Checking the chair…</p>
+        ) : slots.length === 0 ? (
+          <p className="text-sm italic text-ink-faint">
+            {isClosedDate ? 'Closed' : slotsError ?? 'No openings on this day.'}
+          </p>
+        ) : (
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            {slots.map((s) => {
+              const isPicked = selectedSlot === s;
+              return (
+                <button
+                  type="button"
+                  key={s}
+                  onClick={() => setSelectedSlot(s)}
+                  className={[
+                    'numerals rounded-sm border px-2 py-2.5 text-sm transition-all',
+                    isPicked
+                      ? 'border-ink bg-ink text-paper shadow-sm'
+                      : 'border-brass-pale/70 bg-paper-warm text-ink hover:border-burgundy hover:text-burgundy',
+                  ].join(' ')}
+                  aria-pressed={isPicked}
+                >
+                  {s}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        {slotsError && slots.length === 0 ? (
+          <p className="mt-2 text-xs text-burgundy">{slotsError}</p>
+        ) : null}
+      </div>
+
       <button
         type="submit"
-        disabled={submitting || slots.length === 0}
-        className={primaryButtonClass}
+        disabled={submitting || slots.length === 0 || !selectedSlot}
+        className="btn-primary mt-2"
       >
-        {submitting ? 'Booking…' : 'Book appointment'}
+        {submitting ? 'Holding the chair…' : 'Confirm reservation'}
+        <span aria-hidden="true">→</span>
       </button>
     </form>
   );

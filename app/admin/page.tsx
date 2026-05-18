@@ -1,10 +1,8 @@
-import Link from 'next/link';
-
 import { requireAdmin } from '@/lib/auth';
 import { getShopSettings, listClosedDates } from '@/lib/shop-settings';
 import { todayInBangkok } from '@/lib/timezone';
 
-import { inputClass, primaryButtonClass } from './_styles';
+import { AdminHeader } from './_components/admin-header';
 import {
   addClosedDateAction,
   removeClosedDateAction,
@@ -36,84 +34,57 @@ export default async function AdminPage({
   ]);
 
   return (
-    <main className="mx-auto max-w-3xl px-6 py-10">
-      <header className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">Shop admin</h1>
-          <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-            Signed in as{' '}
-            <span className="font-medium text-zinc-700 dark:text-zinc-300">{username}</span>
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link
-            href="/admin/bookings"
-            className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
-          >
-            Manage bookings
-          </Link>
-          <form action="/admin/logout" method="post">
-            <button
-              type="submit"
-              className="text-sm text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
-            >
-              Log out
-            </button>
-          </form>
-        </div>
-      </header>
+    <main className="mx-auto w-full max-w-4xl px-6 py-10 sm:py-14">
+      <AdminHeader username={username} active="settings" />
 
       {params.error ? (
-        <p
-          className="mt-6 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-          role="alert"
-        >
+        <p className="reveal reveal-d2 banner-error mt-8" role="alert">
           {params.error}
         </p>
       ) : null}
       {params.ok ? (
-        <p className="mt-6 rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-          Saved.
-        </p>
+        <p className="reveal reveal-d2 banner-ok mt-8">Saved.</p>
       ) : null}
 
-      <section className="mt-10">
-        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Shop hours</h2>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Applied to every open day. All times are in Asia/Bangkok.
+      <section className="reveal reveal-d2 mt-12">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-display text-3xl text-ink">Shop hours</h2>
+          <p className="tracking-mark text-[0.65rem] text-brass">Asia / Bangkok</p>
+        </div>
+        <p className="mt-2 text-sm text-ink-soft">
+          Applied to every open day.
         </p>
+
         <form
           action={updateSettingsAction}
-          className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3"
+          className="corner-brackets card-paper mt-6 grid grid-cols-1 gap-5 p-7 sm:grid-cols-3 sm:p-8"
         >
-          <label className="text-sm">
-            <span className="block font-medium text-zinc-700 dark:text-zinc-300">Open time</span>
+          <label>
+            <span className="label-mark">Open time</span>
             <input
               type="time"
               name="openTime"
               defaultValue={settings.openTime}
               required
-              className={inputClass}
+              className="input-vintage numerals"
             />
           </label>
-          <label className="text-sm">
-            <span className="block font-medium text-zinc-700 dark:text-zinc-300">Close time</span>
+          <label>
+            <span className="label-mark">Close time</span>
             <input
               type="time"
               name="closeTime"
               defaultValue={settings.closeTime}
               required
-              className={inputClass}
+              className="input-vintage numerals"
             />
           </label>
-          <label className="text-sm">
-            <span className="block font-medium text-zinc-700 dark:text-zinc-300">
-              Closed every
-            </span>
+          <label>
+            <span className="label-mark">Closed every</span>
             <select
               name="weeklyClosedWeekday"
               defaultValue={settings.weeklyClosedWeekday}
-              className={inputClass}
+              className="input-vintage"
             >
               {WEEKDAY_NAMES.map((name, i) => (
                 <option key={name} value={i}>
@@ -123,38 +94,42 @@ export default async function AdminPage({
             </select>
           </label>
           <div className="sm:col-span-3">
-            <button type="submit" className={primaryButtonClass}>
+            <button type="submit" className="btn-primary">
               Save shop hours
             </button>
           </div>
         </form>
       </section>
 
-      <section className="mt-12">
-        <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">Closed dates</h2>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+      <section className="reveal reveal-d3 mt-16">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="font-display text-3xl text-ink">Closed dates</h2>
+          <p className="tracking-mark text-[0.65rem] text-brass">{closedDates.length} listed</p>
+        </div>
+        <p className="mt-2 text-sm text-ink-soft">
           One-off closures on top of the weekly closed day. Past dates are hidden.
         </p>
 
-        <ul className="mt-4 divide-y divide-zinc-200 rounded-md border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+        <ul className="mt-6 divide-y divide-brass-pale/40 border-y border-brass-pale/40">
           {closedDates.length === 0 ? (
-            <li className="px-4 py-3 text-sm text-zinc-500 dark:text-zinc-400">
-              No closed dates yet.
-            </li>
+            <li className="px-1 py-4 text-sm italic text-ink-faint">No closed dates yet.</li>
           ) : (
             closedDates.map((d) => (
-              <li key={d.id} className="flex items-center justify-between px-4 py-3 text-sm">
-                <div>
-                  <span className="font-medium text-zinc-900 dark:text-zinc-50">{d.closedOn}</span>
+              <li
+                key={d.id}
+                className="flex items-center justify-between gap-4 py-4 text-sm"
+              >
+                <div className="flex flex-wrap items-baseline gap-x-3">
+                  <span className="font-display numerals text-lg text-ink">{d.closedOn}</span>
                   {d.note ? (
-                    <span className="ml-2 text-zinc-500 dark:text-zinc-400">— {d.note}</span>
+                    <span className="italic text-ink-soft">— {d.note}</span>
                   ) : null}
                 </div>
                 <form action={removeClosedDateAction}>
                   <input type="hidden" name="id" value={d.id} />
                   <button
                     type="submit"
-                    className="text-sm text-red-600 hover:underline dark:text-red-400"
+                    className="tracking-mark text-[0.7rem] text-burgundy underline-offset-4 hover:underline"
                   >
                     Remove
                   </button>
@@ -164,31 +139,32 @@ export default async function AdminPage({
           )}
         </ul>
 
-        <form action={addClosedDateAction} className="mt-4 flex flex-wrap items-end gap-3">
-          <label className="text-sm">
-            <span className="block font-medium text-zinc-700 dark:text-zinc-300">Date</span>
+        <form
+          action={addClosedDateAction}
+          className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_2fr_auto] sm:items-end"
+        >
+          <label>
+            <span className="label-mark">Date</span>
             <input
               type="date"
               name="closedOn"
               min={today}
               required
-              className={inputClass}
+              className="input-vintage numerals"
             />
           </label>
-          <label className="flex-1 text-sm">
-            <span className="block font-medium text-zinc-700 dark:text-zinc-300">
-              Note (optional)
-            </span>
+          <label>
+            <span className="label-mark">Note (optional)</span>
             <input
               type="text"
               name="note"
               maxLength={120}
               placeholder="e.g. Public holiday"
-              className={inputClass}
+              className="input-vintage"
             />
           </label>
-          <button type="submit" className={primaryButtonClass}>
-            Add closed date
+          <button type="submit" className="btn-ghost">
+            Add closure
           </button>
         </form>
       </section>

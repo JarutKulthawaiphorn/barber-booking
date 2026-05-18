@@ -37,26 +37,28 @@ export default async function BookPage({
     : [];
 
   return (
-    <main className="mx-auto max-w-md px-6 py-10">
-      <header>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Book an appointment
+    <main className="mx-auto w-full max-w-2xl px-6 py-12 sm:py-16">
+      <Link href="/" className="reveal reveal-d1 btn-link inline-block">
+        ← The Bangkok Barber
+      </Link>
+
+      <header className="reveal reveal-d2 mt-10">
+        <p className="tracking-mark text-xs text-brass">№ 02 — Reserve</p>
+        <h1 className="font-display mt-4 text-5xl leading-tight text-ink sm:text-6xl">
+          Reserve <em className="text-burgundy not-italic font-display italic">a chair</em>
         </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Pick a date and a 30-minute slot. Times are Asia/Bangkok.
+        <p className="ornament-rule mt-6 text-xs tracking-mark">
+          <span>Half-hour appointments</span>
         </p>
       </header>
 
       {params.error ? (
-        <p
-          className="mt-6 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-          role="alert"
-        >
+        <p className="reveal reveal-d3 banner-error mt-8" role="alert">
           {params.error}
         </p>
       ) : null}
 
-      <section className="mt-8">
+      <section className="reveal reveal-d3 corner-brackets card-paper mt-10 p-7 sm:p-10">
         <BookingForm
           bookableDates={bookableDates}
           initialDate={initialDate}
@@ -64,13 +66,8 @@ export default async function BookPage({
         />
       </section>
 
-      <p className="mt-10 text-sm">
-        <Link
-          href="/"
-          className="text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
-        >
-          ← Back to home
-        </Link>
+      <p className="mt-8 text-xs tracking-mark text-ink-faint text-center">
+        Times shown in Asia / Bangkok
       </p>
     </main>
   );

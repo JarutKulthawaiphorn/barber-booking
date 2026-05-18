@@ -2,32 +2,84 @@ import Link from 'next/link';
 
 export default function HomePage() {
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center px-6 py-12">
-      <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
-        Barbershop appointments
-      </h1>
-      <p className="mt-3 text-zinc-600 dark:text-zinc-400">
-        Book a 30-minute slot, or pull up an existing reservation with your phone number.
-      </p>
-
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+    <main className="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-10 sm:py-14">
+      {/* Top marque */}
+      <header className="reveal reveal-d1 flex items-center justify-between text-[0.72rem] tracking-mark text-ink-soft">
+        <span className="flex items-center gap-2">
+          <span className="inline-block h-1.5 w-1.5 rotate-45 bg-burgundy" />
+          The Bangkok Barber
+        </span>
+        <span className="hidden sm:inline">Est. MMXXVI · Asia/Bangkok</span>
         <Link
-          href="/book"
-          className="rounded-md bg-zinc-900 px-5 py-3 text-center text-sm font-medium text-white transition-colors hover:bg-zinc-700 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200"
+          href="/admin/login"
+          className="text-ink-faint hover:text-burgundy transition-colors"
         >
-          Book an appointment
+          Staff
         </Link>
-        <Link
-          href="/lookup"
-          className="rounded-md border border-zinc-300 px-5 py-3 text-center text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-50 dark:hover:bg-zinc-800"
-        >
-          Look up my booking
-        </Link>
-      </div>
+      </header>
 
-      <p className="mt-12 text-xs text-zinc-400 dark:text-zinc-600">
-        Booking and lookup go live in the next milestones.
-      </p>
+      {/* Hero */}
+      <section className="relative mt-16 grid flex-1 grid-cols-12 gap-6 sm:mt-24">
+        {/* Animated barber pole */}
+        <div className="reveal reveal-d2 col-span-1 hidden sm:flex sm:items-stretch">
+          <div className="barber-pole w-3 rounded-full sm:w-4" aria-hidden="true" />
+        </div>
+
+        <div className="col-span-12 sm:col-span-11">
+          <p className="reveal reveal-d2 tracking-mark text-xs text-brass">
+            № 01 — Reservations
+          </p>
+
+          <h1 className="reveal reveal-d3 font-display mt-4 text-[clamp(3rem,9vw,7.5rem)] leading-[0.92] text-ink">
+            The chair,
+            <br />
+            the clippers,
+            <br />
+            <em className="text-burgundy not-italic font-display italic">the cut.</em>
+          </h1>
+
+          <div className="reveal reveal-d4 mt-10 max-w-xl">
+            <p className="text-base text-ink-soft sm:text-lg">
+              Thirty-minute appointments, six days a week. Pick a chair, leave a number, and we&apos;ll
+              hold the time.
+            </p>
+          </div>
+
+          <div className="reveal reveal-d5 mt-12 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-5">
+            <Link href="/book" className="btn-primary w-full sm:w-auto">
+              Book a chair
+              <span aria-hidden="true">→</span>
+            </Link>
+            <Link href="/lookup" className="btn-link">
+              Find an existing booking
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Lower ornament strip */}
+      <section className="reveal reveal-d6 mt-20 grid grid-cols-1 gap-8 border-t border-brass-pale/60 pt-10 sm:mt-28 sm:grid-cols-3">
+        <div>
+          <p className="tracking-mark text-[0.65rem] text-brass">Hours</p>
+          <p className="font-display mt-2 text-2xl text-ink numerals">09:00 — 19:00</p>
+          <p className="mt-1 text-sm text-ink-mid">Tuesday through Sunday</p>
+        </div>
+        <div>
+          <p className="tracking-mark text-[0.65rem] text-brass">Service</p>
+          <p className="font-display mt-2 text-2xl text-ink">Thirty minutes</p>
+          <p className="mt-1 text-sm text-ink-mid">Cut, shape, hot finish</p>
+        </div>
+        <div>
+          <p className="tracking-mark text-[0.65rem] text-brass">Reach us</p>
+          <p className="font-display mt-2 text-2xl text-ink">Phone only</p>
+          <p className="mt-1 text-sm text-ink-mid">06 / 08 / 09 numbers</p>
+        </div>
+      </section>
+
+      <footer className="mt-16 flex items-center justify-between text-[0.7rem] tracking-mark text-ink-faint">
+        <span>One chair · one cut · one time</span>
+        <span aria-hidden="true">✦</span>
+      </footer>
     </main>
   );
 }

@@ -5,14 +5,7 @@ import { todayInBangkok } from '@/lib/timezone';
 
 import { cancelBookingAction, lookupBookingsAction } from './actions';
 
-const inputClass =
-  'mt-2 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm shadow-sm focus:border-zinc-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-50';
-
-const primaryButtonClass =
-  'rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-200';
-
 function maskPhone(phone: string): string {
-  // 0812345678 → 081-XXX-5678
   if (phone.length !== 10) return phone;
   return `${phone.slice(0, 3)}-XXX-${phone.slice(6)}`;
 }
@@ -58,34 +51,34 @@ export default async function LookupPage({
   const results = phone ? await loadBookings(phone) : null;
 
   return (
-    <main className="mx-auto max-w-md px-6 py-10">
-      <header>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Look up your booking
+    <main className="mx-auto w-full max-w-xl px-6 py-12 sm:py-16">
+      <Link href="/" className="reveal reveal-d1 btn-link inline-block">
+        ← The Bangkok Barber
+      </Link>
+
+      <header className="reveal reveal-d2 mt-10">
+        <p className="tracking-mark text-xs text-brass">№ 04 — Look up</p>
+        <h1 className="font-display mt-4 text-5xl leading-tight text-ink sm:text-6xl">
+          Find your <em className="font-display italic text-burgundy not-italic">appointment</em>
         </h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-4 text-sm text-ink-soft">
           Enter the phone number you booked with.
         </p>
       </header>
 
       {params.error ? (
-        <p
-          className="mt-6 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-          role="alert"
-        >
+        <p className="reveal reveal-d3 banner-error mt-8" role="alert">
           {params.error}
         </p>
       ) : null}
       {params.ok ? (
-        <p className="mt-6 rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-          {params.ok}
-        </p>
+        <p className="reveal reveal-d3 banner-ok mt-8">{params.ok}</p>
       ) : null}
 
-      <section className="mt-8">
-        <form action={lookupBookingsAction} className="grid grid-cols-1 gap-4">
-          <label className="text-sm">
-            <span className="block font-medium text-zinc-700 dark:text-zinc-300">Phone</span>
+      <section className="reveal reveal-d3 corner-brackets card-paper mt-10 p-7 sm:p-8">
+        <form action={lookupBookingsAction} className="flex flex-col gap-5 sm:flex-row sm:items-end">
+          <label className="flex-1">
+            <span className="label-mark">Phone</span>
             <input
               type="tel"
               name="phone"
@@ -93,81 +86,74 @@ export default async function LookupPage({
               autoComplete="tel"
               required
               defaultValue={phone ?? ''}
-              placeholder="0812345678"
+              placeholder="081 234 5678"
               pattern="[0-9\s-]*"
               maxLength={15}
-              className={inputClass}
+              className="input-vintage numerals"
             />
-            <span className="mt-1 block text-xs text-zinc-500 dark:text-zinc-400">
-              Thai mobile only — 10 digits starting with 06, 08, or 09.
-            </span>
           </label>
 
-          <button type="submit" className={primaryButtonClass}>
+          <button type="submit" className="btn-primary">
             Look up
           </button>
         </form>
       </section>
 
       {results ? (
-        <section className="mt-10">
+        <section className="reveal reveal-d4 mt-12">
           {results.lookupError ? (
-            <p
-              className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300"
-              role="alert"
-            >
+            <p className="banner-error" role="alert">
               {results.lookupError}
             </p>
           ) : results.upcoming.length === 0 && results.past.length === 0 ? (
-            <p className="rounded-md bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+            <p className="banner-warn">
               No bookings found for that phone number.
             </p>
           ) : (
             <>
-              <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50">
-                Upcoming
-              </h2>
+              <p className="ornament-rule text-xs tracking-mark">
+                <span>Upcoming</span>
+              </p>
+
               {results.upcoming.length === 0 ? (
-                <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+                <p className="mt-5 text-center text-sm italic text-ink-faint">
                   No upcoming booking.
                 </p>
               ) : (
-                <ul className="mt-3 space-y-3">
+                <ul className="mt-6 space-y-5">
                   {results.upcoming.map((b) => (
-                    <li
-                      key={b.id}
-                      className="rounded-2xl bg-emerald-50 p-5 ring-1 ring-emerald-200 dark:bg-emerald-950 dark:ring-emerald-900"
-                    >
-                      <dl className="space-y-2 text-sm">
-                        <div className="flex justify-between gap-4">
-                          <dt className="text-emerald-800 dark:text-emerald-300">Date</dt>
-                          <dd className="font-medium text-emerald-950 dark:text-emerald-50">
-                            {formatDateLabel(b.bookedOn)}
-                          </dd>
+                    <li key={b.id} className="ticket px-7 py-7">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="tracking-mark text-[0.62rem] text-brass">
+                            {formatDateLabel(b.bookedOn).split(',')[0]}
+                          </p>
+                          <p className="font-display mt-1 text-2xl text-ink">
+                            {formatDateLabel(b.bookedOn).split(',').slice(1).join(',').trim()}
+                          </p>
                         </div>
-                        <div className="flex justify-between gap-4">
-                          <dt className="text-emerald-800 dark:text-emerald-300">Time</dt>
-                          <dd className="font-medium text-emerald-950 dark:text-emerald-50">
-                            {b.slotTime}
-                          </dd>
-                        </div>
-                        <div className="flex justify-between gap-4">
-                          <dt className="text-emerald-800 dark:text-emerald-300">Phone</dt>
-                          <dd className="font-medium text-emerald-950 dark:text-emerald-50">
-                            {maskPhone(b.phone)}
-                          </dd>
-                        </div>
-                      </dl>
-                      <form action={cancelBookingAction} className="mt-4 flex justify-end">
-                        <input type="hidden" name="id" value={b.id} />
-                        <input type="hidden" name="phone" value={b.phone} />
-                        <button
-                          type="submit"
-                          className="text-sm font-medium text-red-700 hover:underline dark:text-red-400"
-                        >
-                          Cancel booking
-                        </button>
-                      </form>
+                        <p className="font-display numerals text-4xl text-burgundy">
+                          {b.slotTime}
+                        </p>
+                      </div>
+
+                      <div className="ornament-rule my-5 text-xs">
+                        <span aria-hidden="true">✦</span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="numerals text-sm text-ink-soft">{maskPhone(b.phone)}</span>
+                        <form action={cancelBookingAction}>
+                          <input type="hidden" name="id" value={b.id} />
+                          <input type="hidden" name="phone" value={b.phone} />
+                          <button
+                            type="submit"
+                            className="tracking-mark text-[0.7rem] text-burgundy underline-offset-4 hover:underline"
+                          >
+                            Cancel
+                          </button>
+                        </form>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -175,19 +161,17 @@ export default async function LookupPage({
 
               {results.past.length > 0 ? (
                 <>
-                  <h2 className="mt-10 text-base font-semibold text-zinc-900 dark:text-zinc-50">
-                    Previous visits
-                  </h2>
-                  <ul className="mt-3 divide-y divide-zinc-200 rounded-md border border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+                  <p className="ornament-rule mt-12 text-xs tracking-mark">
+                    <span>Previous visits</span>
+                  </p>
+                  <ul className="mt-5 divide-y divide-brass-pale/40 border-y border-brass-pale/40">
                     {results.past.map((b) => (
                       <li
                         key={b.id}
-                        className="flex items-center justify-between px-4 py-3 text-sm"
+                        className="flex items-center justify-between py-3 text-sm"
                       >
-                        <span className="text-zinc-700 dark:text-zinc-300">
-                          {formatDateLabel(b.bookedOn)}
-                        </span>
-                        <span className="text-zinc-500 dark:text-zinc-400">{b.slotTime}</span>
+                        <span className="text-ink-soft">{formatDateLabel(b.bookedOn)}</span>
+                        <span className="numerals text-ink-mid">{b.slotTime}</span>
                       </li>
                     ))}
                   </ul>
@@ -197,15 +181,6 @@ export default async function LookupPage({
           )}
         </section>
       ) : null}
-
-      <p className="mt-10 text-sm">
-        <Link
-          href="/"
-          className="text-zinc-600 underline-offset-4 hover:underline dark:text-zinc-400"
-        >
-          ← Back to home
-        </Link>
-      </p>
     </main>
   );
 }
