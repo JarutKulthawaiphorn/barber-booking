@@ -17,6 +17,22 @@ type Props = {
   initialSlots: SlotStatus[];
 };
 
+const THAI_WEEKDAY_SHORT = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] as const;
+const THAI_MONTH_SHORT = [
+  'ม.ค.',
+  'ก.พ.',
+  'มี.ค.',
+  'เม.ย.',
+  'พ.ค.',
+  'มิ.ย.',
+  'ก.ค.',
+  'ส.ค.',
+  'ก.ย.',
+  'ต.ค.',
+  'พ.ย.',
+  'ธ.ค.',
+] as const;
+
 function parseDateUTC(yyyyMmDd: string): Date {
   const [y, m, d] = yyyyMmDd.split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, d));
@@ -27,19 +43,12 @@ function dayNumber(date: string): number {
 }
 
 function weekdayShort(date: string): string {
-  return parseDateUTC(date).toLocaleDateString('en-US', {
-    weekday: 'short',
-    timeZone: 'UTC',
-  });
+  return THAI_WEEKDAY_SHORT[parseDateUTC(date).getUTCDay()];
 }
 
 function formatPickedDate(date: string): string {
-  return parseDateUTC(date).toLocaleDateString('en-US', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    timeZone: 'UTC',
-  });
+  const dt = parseDateUTC(date);
+  return `${THAI_WEEKDAY_SHORT[dt.getUTCDay()]} ${dt.getUTCDate()} ${THAI_MONTH_SHORT[dt.getUTCMonth()]}`;
 }
 
 function BookingSubmitButton({ disabled }: { disabled: boolean }) {
@@ -51,7 +60,7 @@ function BookingSubmitButton({ disabled }: { disabled: boolean }) {
       disabled={pending || disabled}
       className="btn btn-primary btn-block"
     >
-      {pending ? 'Holding the chair…' : 'Confirm booking'}
+      {pending ? 'กำลังจองคิว…' : 'ยืนยันการจอง'}
       {!pending && (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
@@ -90,7 +99,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
   if (bookableSet.size === 0) {
     return (
       <p className="banner banner-warn mt-6">
-        No open chairs in the next two weeks. Please check back later.
+        ไม่มีคิวว่างในช่วง 2 สัปดาห์ข้างหน้า กรุณาลองใหม่ภายหลัง
       </p>
     );
   }
@@ -105,7 +114,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
     >
       {/* Pick a date */}
       <section>
-        <h2 className="text-[22px] font-semibold">Pick a date</h2>
+        <h2 className="text-[22px] font-semibold">เลือกวันที่</h2>
         <p className="mt-1 text-[13px]" style={{ color: 'var(--color-muted)' }}>
           Asia/Bangkok · GMT+7
         </p>
@@ -140,7 +149,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
                   <span
                     style={{ fontSize: 10, color: 'var(--color-faint)' }}
                   >
-                    closed
+                    ปิด
                   </span>
                 )}
               </button>
@@ -152,7 +161,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
       {/* Pick a time */}
       <section className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between">
-          <h2 className="text-[22px] font-semibold">Pick a time</h2>
+          <h2 className="text-[22px] font-semibold">เลือกเวลา</h2>
           {date && (
             <span className="text-[13px]" style={{ color: 'var(--color-muted)' }}>
               {formatPickedDate(date)}
@@ -174,7 +183,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
                 border: '1px solid var(--color-border-2)',
               }}
             />
-            Open
+            ว่าง
           </span>
           <span className="flex items-center gap-1.5">
             <span
@@ -186,7 +195,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
                 border: '1px solid var(--color-border)',
               }}
             />
-            Taken
+            ถูกจอง
           </span>
           <span className="flex items-center gap-1.5">
             <span
@@ -197,7 +206,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
                 background: 'var(--color-accent)',
               }}
             />
-            Selected
+            เลือกแล้ว
           </span>
         </div>
 
@@ -205,15 +214,15 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
 
         {!date ? (
           <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
-            Pick a date first.
+            กรุณาเลือกวันที่ก่อน
           </p>
         ) : slotsState.loading ? (
           <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
-            Checking the chair…
+            กำลังตรวจสอบคิว…
           </p>
         ) : slots.length === 0 ? (
           <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
-            {slotsState.error ?? 'No openings on this day.'}
+            {slotsState.error ?? 'ไม่มีคิวว่างในวันนี้'}
           </p>
         ) : (
           <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
@@ -234,7 +243,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
 
         {allTaken ? (
           <p className="text-[12px]" style={{ color: 'var(--color-danger)' }}>
-            Every slot is taken on this day.
+            คิวเต็มในวันนี้
           </p>
         ) : null}
         {slotsState.error && slots.length === 0 ? (
@@ -246,11 +255,11 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
 
       {/* Customer details */}
       <section className="flex flex-col gap-4">
-        <h2 className="text-[17px] font-semibold">Your details</h2>
+        <h2 className="text-[17px] font-semibold">ข้อมูลของคุณ</h2>
 
         <div className="field">
           <label className="label" htmlFor="customerName">
-            Name
+            ชื่อ
           </label>
           <input
             id="customerName"
@@ -260,17 +269,17 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
             required
             minLength={NAME_MIN}
             maxLength={NAME_MAX}
-            placeholder="Your name"
+            placeholder="ชื่อของคุณ"
             className="input"
           />
           <span className="hint">
-            {NAME_MIN}–{NAME_MAX} characters.
+            ใช้ตัวอักษร {NAME_MIN}–{NAME_MAX} ตัว
           </span>
         </div>
 
         <div className="field">
           <label className="label" htmlFor="phone">
-            Phone
+            เบอร์โทร
           </label>
           <div className="input-prefix">
             <span className="prefix">+66</span>
@@ -288,7 +297,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
             />
           </div>
           <span className="hint">
-            Thai mobile starting 06, 08 or 09.
+            เบอร์มือถือไทย ขึ้นต้นด้วย 06, 08 หรือ 09
           </span>
         </div>
       </section>
@@ -303,7 +312,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
       >
         {date && selectedSlot ? (
           <div className="flex items-center justify-between text-[14px]">
-            <span style={{ color: 'var(--color-muted)' }}>Selected</span>
+            <span style={{ color: 'var(--color-muted)' }}>ที่เลือก</span>
             <span className="font-semibold tnum">
               {formatPickedDate(date)} · {selectedSlot}
             </span>

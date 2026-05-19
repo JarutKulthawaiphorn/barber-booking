@@ -5,7 +5,8 @@
       "Bash(pnpm test *)",
       "Bash(pnpm build *)",
       "Read(//c/c/Web Projects/**)",
-      "Read(//c/c/Web Projects/barber-booking/**)"
+      "Read(//c/c/Web Projects/barber-booking/**)",
+      "Bash(pnpm exec *)"
     ]
   }
 }

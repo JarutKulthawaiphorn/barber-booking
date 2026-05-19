@@ -5,7 +5,7 @@ export default function RootLoading() {
         className="text-[14px]"
         style={{ color: 'var(--color-muted)' }}
       >
-        Loading…
+        กำลังโหลด…
       </p>
     </main>
   );

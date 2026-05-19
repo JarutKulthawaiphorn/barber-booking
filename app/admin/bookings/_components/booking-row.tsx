@@ -24,7 +24,7 @@ export function BookingRow({
   date: string;
 }) {
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    if (!window.confirm(`Cancel the ${slotTime} booking? This cannot be undone.`)) {
+    if (!window.confirm(`ยกเลิกการจองเวลา ${slotTime} ใช่หรือไม่? ไม่สามารถย้อนกลับได้`)) {
       e.preventDefault();
     }
   }
@@ -59,7 +59,7 @@ export function BookingRow({
               color: 'var(--color-danger)',
             }}
           >
-            Cancel
+            ยกเลิก
           </button>
         </form>
       </span>

@@ -12,20 +12,39 @@ import { BookingRow } from './_components/booking-row';
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const metadata: Metadata = {
-  title: 'Admin · Schedule',
+  title: 'พนักงาน · ตารางคิว',
   robots: { index: false, follow: false },
 };
+
+const THAI_WEEKDAY_LONG = [
+  'อาทิตย์',
+  'จันทร์',
+  'อังคาร',
+  'พุธ',
+  'พฤหัสบดี',
+  'ศุกร์',
+  'เสาร์',
+] as const;
+const THAI_MONTH_LONG = [
+  'มกราคม',
+  'กุมภาพันธ์',
+  'มีนาคม',
+  'เมษายน',
+  'พฤษภาคม',
+  'มิถุนายน',
+  'กรกฎาคม',
+  'สิงหาคม',
+  'กันยายน',
+  'ตุลาคม',
+  'พฤศจิกายน',
+  'ธันวาคม',
+] as const;
 
 function formatDateLabel(yyyyMmDd: string): string {
   const [y, m, d] = yyyyMmDd.split('-').map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
-  return dt.toLocaleDateString('en-US', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+  const buddhistYear = dt.getUTCFullYear() + 543;
+  return `${THAI_WEEKDAY_LONG[dt.getUTCDay()]} ${dt.getUTCDate()} ${THAI_MONTH_LONG[dt.getUTCMonth()]} ${buddhistYear}`;
 }
 
 export default async function AdminBookingsPage({
@@ -78,7 +97,7 @@ export default async function AdminBookingsPage({
       <section className="mt-5 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-[22px] font-semibold">
-            {isToday ? 'Today' : 'Schedule'}
+            {isToday ? 'วันนี้' : 'ตารางคิว'}
           </h1>
           <p className="mt-1 text-[13px]" style={{ color: 'var(--color-muted)' }}>
             {label} · Asia/Bangkok
@@ -92,7 +111,7 @@ export default async function AdminBookingsPage({
               htmlFor="date"
               style={{ fontSize: 12 }}
             >
-              Jump to date
+              ไปยังวันที่
             </label>
             <input
               id="date"
@@ -105,7 +124,7 @@ export default async function AdminBookingsPage({
             />
           </div>
           <button type="submit" className="btn btn-secondary btn-sm">
-            View
+            ดู
           </button>
         </form>
       </section>
@@ -127,10 +146,10 @@ export default async function AdminBookingsPage({
               borderBottom: '1px solid var(--color-border)',
             }}
           >
-            <span>Time</span>
-            <span>Customer</span>
-            <span>Phone</span>
-            <span>Barber</span>
+            <span>เวลา</span>
+            <span>ลูกค้า</span>
+            <span>เบอร์โทร</span>
+            <span>ช่างตัด</span>
             <span />
           </div>
 
@@ -151,13 +170,13 @@ export default async function AdminBookingsPage({
           ) : (
             <div className="px-4 py-10 text-center">
               <div className="text-[14px] font-medium">
-                No bookings on this day
+                ไม่มีการจองในวันนี้
               </div>
               <div
                 className="mt-1 text-[13px]"
                 style={{ color: 'var(--color-muted)' }}
               >
-                Add a walk-in or phone booking below.
+                เพิ่ม walk-in หรือการจองทางโทรศัพท์ด้านล่าง
               </div>
             </div>
           )}
@@ -166,13 +185,13 @@ export default async function AdminBookingsPage({
 
       <section className="mt-8">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 className="text-[18px] font-semibold">Add booking</h2>
+          <h2 className="text-[18px] font-semibold">เพิ่มการจอง</h2>
           <span className="text-[13px]" style={{ color: 'var(--color-muted)' }}>
-            Walk-in or phone
+            Walk-in หรือโทรจอง
           </span>
         </div>
         <p className="mt-1 text-[13px]" style={{ color: 'var(--color-muted)' }}>
-          The barber name will appear on the booking card.
+          ชื่อช่างจะปรากฏบนการ์ดการจองของลูกค้า
         </p>
         <div className="mt-4">
           <AdminBookingForm

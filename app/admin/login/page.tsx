@@ -7,13 +7,13 @@ import { getAdminSession } from '@/lib/auth';
 import { loginAction } from './actions';
 
 export const metadata: Metadata = {
-  title: 'Staff login',
+  title: 'เข้าสู่ระบบพนักงาน',
   robots: { index: false, follow: false },
 };
 
 const ERROR_MESSAGES: Record<string, string> = {
-  missing: 'Username and password are required.',
-  invalid: 'Invalid username or password.',
+  missing: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน',
+  invalid: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',
 };
 
 export default async function AdminLoginPage({
@@ -26,7 +26,7 @@ export default async function AdminLoginPage({
   }
 
   const params = await searchParams;
-  const error = params.error ? (ERROR_MESSAGES[params.error] ?? 'Login failed.') : null;
+  const error = params.error ? (ERROR_MESSAGES[params.error] ?? 'เข้าสู่ระบบไม่สำเร็จ') : null;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-stretch justify-center px-4 py-10 sm:px-6">
@@ -41,9 +41,9 @@ export default async function AdminLoginPage({
         >
           B
         </div>
-        <h1 className="mt-1 text-[22px] font-semibold">Staff login</h1>
+        <h1 className="mt-1 text-[22px] font-semibold">เข้าสู่ระบบพนักงาน</h1>
         <p className="text-[14px]" style={{ color: 'var(--color-muted)' }}>
-          The Bangkok Barber — admin area
+          Barber Booking — สำหรับพนักงาน
         </p>
       </div>
 
@@ -53,7 +53,7 @@ export default async function AdminLoginPage({
       >
         <div className="field">
           <label className="label" htmlFor="username">
-            Username
+            ชื่อผู้ใช้
           </label>
           <input
             id="username"
@@ -69,7 +69,7 @@ export default async function AdminLoginPage({
 
         <div className="field">
           <label className="label" htmlFor="password">
-            Password
+            รหัสผ่าน
           </label>
           <input
             id="password"
@@ -88,7 +88,7 @@ export default async function AdminLoginPage({
         ) : null}
 
         <button type="submit" className="btn btn-primary btn-block">
-          Sign in
+          เข้าสู่ระบบ
         </button>
       </form>
 
@@ -98,7 +98,7 @@ export default async function AdminLoginPage({
           className="text-[14px] no-underline"
           style={{ color: 'var(--color-muted)' }}
         >
-          ← Back to The Bangkok Barber
+          ← กลับสู่ Barber Booking
         </Link>
       </p>
     </main>

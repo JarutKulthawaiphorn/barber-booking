@@ -35,18 +35,18 @@ function parseTimeMinutes(t: string): number {
 
 export function validateShopSettings(input: ShopSettings): void {
   if (!TIME_RE.test(input.openTime)) {
-    throw new Error('openTime must be in HH:MM 24-hour format');
+    throw new Error('เวลาเปิดต้องอยู่ในรูปแบบ HH:MM (24 ชม.)');
   }
   if (!TIME_RE.test(input.closeTime)) {
-    throw new Error('closeTime must be in HH:MM 24-hour format');
+    throw new Error('เวลาปิดต้องอยู่ในรูปแบบ HH:MM (24 ชม.)');
   }
   const open = parseTimeMinutes(input.openTime);
   const close = parseTimeMinutes(input.closeTime);
   if (open >= close) {
-    throw new Error('openTime must be earlier than closeTime');
+    throw new Error('เวลาเปิดต้องอยู่ก่อนเวลาปิด');
   }
   if (close - open < 30) {
-    throw new Error('Shop must be open for at least 30 minutes');
+    throw new Error('ร้านต้องเปิดอย่างน้อย 30 นาที');
   }
   if (input.weeklyClosedWeekday !== null) {
     if (
@@ -54,17 +54,17 @@ export function validateShopSettings(input: ShopSettings): void {
       input.weeklyClosedWeekday < 0 ||
       input.weeklyClosedWeekday > 6
     ) {
-      throw new Error('weeklyClosedWeekday must be an integer between 0 and 6, or null');
+      throw new Error('วันปิดประจำสัปดาห์ต้องเป็นตัวเลข 0–6 หรือว่าง');
     }
   }
 }
 
 export function validateClosedDate(closedOn: string, today: string = todayInBangkok()): void {
   if (!DATE_RE.test(closedOn)) {
-    throw new Error('closedOn must be in YYYY-MM-DD format');
+    throw new Error('วันที่ปิดต้องอยู่ในรูปแบบ YYYY-MM-DD');
   }
   if (closedOn < today) {
-    throw new Error('closedOn must not be in the past');
+    throw new Error('วันที่ปิดต้องไม่ใช่อดีต');
   }
 }
 
@@ -159,8 +159,8 @@ export async function addClosedDate(input: {
     .insert({ closed_on: input.closedOn, note: input.note ?? null });
 
   if (error) {
-    if (error.code === '23505') throw new Error('That date is already closed');
-    throw new Error(`Failed to add closed date: ${error.message}`);
+    if (error.code === '23505') throw new Error('วันที่นี้ถูกตั้งเป็นวันปิดอยู่แล้ว');
+    throw new Error(`ไม่สามารถเพิ่มวันที่ปิดได้: ${error.message}`);
   }
 }
 

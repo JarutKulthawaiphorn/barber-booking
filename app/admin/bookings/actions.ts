@@ -7,7 +7,7 @@ import { requireAdmin } from '@/lib/auth';
 import { adminCancelBooking, adminCreateBooking } from '@/lib/booking';
 
 function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : 'Something went wrong';
+  return err instanceof Error ? err.message : 'เกิดข้อผิดพลาด';
 }
 
 function redirectBack(date: string, params: Record<string, string>): never {
@@ -31,7 +31,7 @@ export async function adminCreateBookingAction(formData: FormData): Promise<void
   }
 
   revalidatePath('/admin/bookings');
-  redirectBack(bookedOn, { ok: 'Booking added' });
+  redirectBack(bookedOn, { ok: 'เพิ่มการจองแล้ว' });
 }
 
 export async function adminCancelBookingAction(formData: FormData): Promise<void> {
@@ -39,7 +39,7 @@ export async function adminCancelBookingAction(formData: FormData): Promise<void
 
   const id = String(formData.get('id') ?? '');
   const date = String(formData.get('date') ?? '');
-  if (!id) redirectBack(date, { error: 'Missing booking id' });
+  if (!id) redirectBack(date, { error: 'ไม่พบรหัสการจอง' });
 
   try {
     await adminCancelBooking(id);
@@ -48,5 +48,5 @@ export async function adminCancelBookingAction(formData: FormData): Promise<void
   }
 
   revalidatePath('/admin/bookings');
-  redirectBack(date, { ok: 'Booking cancelled' });
+  redirectBack(date, { ok: 'ยกเลิกการจองแล้ว' });
 }

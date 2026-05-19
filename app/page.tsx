@@ -4,17 +4,17 @@ import { Suspense } from 'react';
 import { getShopSettings } from '@/lib/shop-settings';
 
 const WEEKDAY_NAMES = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
+  'อาทิตย์',
+  'จันทร์',
+  'อังคาร',
+  'พุธ',
+  'พฤหัสบดี',
+  'ศุกร์',
+  'เสาร์',
 ] as const;
 
 function formatOpenDayRange(weeklyClosed: number | null): string {
-  if (weeklyClosed === null) return 'Every day';
+  if (weeklyClosed === null) return 'ทุกวัน';
   const start = (weeklyClosed + 1) % 7;
   const end = (weeklyClosed + 6) % 7;
   return `${WEEKDAY_NAMES[start]} – ${WEEKDAY_NAMES[end]}`;
@@ -37,7 +37,7 @@ async function HoursTile() {
           <span style={{ color: 'var(--color-ink-2)' }}>
             {WEEKDAY_NAMES[settings.weeklyClosedWeekday]}
           </span>
-          <span style={{ color: 'var(--color-muted)' }}>Closed</span>
+          <span style={{ color: 'var(--color-muted)' }}>ปิด</span>
         </div>
       ) : null}
     </>
@@ -47,7 +47,7 @@ async function HoursTile() {
 function HoursTileFallback() {
   return (
     <div className="flex items-baseline justify-between gap-3 text-[15px]">
-      <span style={{ color: 'var(--color-faint)' }}>Loading hours…</span>
+      <span style={{ color: 'var(--color-faint)' }}>กำลังโหลดเวลาทำการ…</span>
     </div>
   );
 }
@@ -68,14 +68,14 @@ export default function HomePage() {
           >
             B
           </div>
-          <span className="text-[15px] font-semibold">Bangkok Barber</span>
+          <span className="text-[15px] font-semibold">Barber Booking</span>
         </div>
         <Link
           href="/admin/login"
           className="text-[13px] no-underline"
           style={{ color: 'var(--color-muted)' }}
         >
-          Staff
+          พนักงาน
         </Link>
       </header>
 
@@ -85,21 +85,21 @@ export default function HomePage() {
             className="text-[28px] font-semibold leading-[1.15]"
             style={{ letterSpacing: '-0.02em' }}
           >
-            Book a chair at
+            จองคิวตัดผมที่
             <br />
-            The Bangkok Barber.
+            Barber Booking
           </h1>
           <p
             className="mt-2.5 max-w-[320px] text-[15px]"
             style={{ color: 'var(--color-ink-2)' }}
           >
-            One shop, two barbers. 30-minute slots, walk-ins welcome when a chair is free.
+            หนึ่งร้าน สองช่าง คิวละ 30 นาที รับ walk-in เมื่อมีคิวว่าง
           </p>
         </div>
 
         <div className="flex flex-col gap-2.5">
           <Link href="/book" className="btn btn-primary btn-block">
-            Book a chair
+            จองคิว
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
                 d="M9 6l6 6-6 6"
@@ -111,7 +111,7 @@ export default function HomePage() {
             </svg>
           </Link>
           <Link href="/lookup" className="btn btn-secondary btn-block">
-            Find an existing booking
+            ค้นหาการจองของคุณ
           </Link>
         </div>
 
@@ -124,7 +124,7 @@ export default function HomePage() {
                 letterSpacing: '0.06em',
               }}
             >
-              Hours
+              เวลาทำการ
             </h2>
             <span className="badge badge-confirmed">
               <span className="badge-dot" />
@@ -146,20 +146,20 @@ export default function HomePage() {
               letterSpacing: '0.06em',
             }}
           >
-            Service
+            บริการ
           </h2>
           <div className="flex flex-col gap-2 text-[15px]">
             <div className="flex items-baseline justify-between">
-              <span>Haircut</span>
+              <span>ตัดผม</span>
               <span style={{ display: 'flex', gap: 12, alignItems: 'baseline' }}>
                 <span className="tnum text-[13px]" style={{ color: 'var(--color-muted)' }}>
-                  30 min
+                  30 นาที
                 </span>
               </span>
             </div>
           </div>
           <p className="mt-1 text-[13px]" style={{ color: 'var(--color-muted)' }}>
-            One price covers the chair — pay in cash on the day.
+            ราคาเดียวต่อคิว — ชำระเงินสดในวันที่มาใช้บริการ
           </p>
         </div>
 
@@ -167,9 +167,9 @@ export default function HomePage() {
           className="text-[13px] leading-[1.55]"
           style={{ color: 'var(--color-muted)' }}
         >
-          Phone bookings only — Thai mobile numbers starting 06, 08 or 09.
+          รับจองผ่านเบอร์มือถือไทยเท่านั้น (ขึ้นต้นด้วย 06, 08 หรือ 09)
           <br />
-          Walk-ins after 18:00 if a chair is open.
+          Walk-in หลัง 18:00 หากมีคิวว่าง
         </div>
       </section>
     </main>

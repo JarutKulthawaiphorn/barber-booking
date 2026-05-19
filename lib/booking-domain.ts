@@ -49,7 +49,7 @@ export function validatePhone(raw: string): string {
   const normalized = normalizePhone(raw);
   if (!THAI_MOBILE_RE.test(normalized)) {
     throw new Error(
-      'Phone number must be a Thai mobile (10 digits, starting with 06, 08, or 09)',
+      'เบอร์ต้องเป็นมือถือไทย 10 หลัก ขึ้นต้นด้วย 06, 08 หรือ 09',
     );
   }
   return normalized;
@@ -59,7 +59,7 @@ export function validatePhone(raw: string): string {
 export function validateCustomerName(raw: string): string {
   const cleaned = raw.replace(/\s+/g, ' ').trim();
   if (cleaned.length < NAME_MIN || cleaned.length > NAME_MAX) {
-    throw new Error(`Name must be ${NAME_MIN}-${NAME_MAX} characters`);
+    throw new Error(`ชื่อต้องมีความยาว ${NAME_MIN}–${NAME_MAX} ตัวอักษร`);
   }
   return cleaned;
 }
@@ -68,7 +68,7 @@ export function validateCustomerName(raw: string): string {
 export function validateBarberName(raw: string): string {
   const cleaned = raw.replace(/\s+/g, ' ').trim();
   if (cleaned.length < NAME_MIN || cleaned.length > NAME_MAX) {
-    throw new Error(`Barber name must be ${NAME_MIN}-${NAME_MAX} characters`);
+    throw new Error(`ชื่อช่างต้องมีความยาว ${NAME_MIN}–${NAME_MAX} ตัวอักษร`);
   }
   return cleaned;
 }

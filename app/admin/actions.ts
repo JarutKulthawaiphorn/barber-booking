@@ -17,7 +17,7 @@ function redirectWithError(message: string): never {
 }
 
 function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : 'Something went wrong';
+  return err instanceof Error ? err.message : 'เกิดข้อผิดพลาด';
 }
 
 export async function updateSettingsAction(formData: FormData): Promise<void> {
@@ -63,7 +63,7 @@ export async function removeClosedDateAction(formData: FormData): Promise<void> 
   await requireAdmin();
 
   const id = String(formData.get('id') ?? '');
-  if (!id) redirectWithError('Missing closed-date id');
+  if (!id) redirectWithError('ไม่พบรหัสวันที่ปิด');
 
   try {
     await removeClosedDate(id);

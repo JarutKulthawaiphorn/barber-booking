@@ -99,7 +99,7 @@ export async function getBookingsByPhone(phone: string): Promise<Booking[]> {
  * this data is operational state, not an audit log.
  */
 export async function adminCancelBooking(id: string): Promise<void> {
-  if (!UUID_RE.test(id)) throw new Error('Booking not found');
+  if (!UUID_RE.test(id)) throw new Error('ไม่พบการจอง');
 
   const { data, error } = await getSupabase()
     .from('bookings')
@@ -108,8 +108,8 @@ export async function adminCancelBooking(id: string): Promise<void> {
     .select('id')
     .maybeSingle();
 
-  if (error) throw new Error(`Failed to cancel booking: ${error.message}`);
-  if (!data) throw new Error('Booking not found');
+  if (error) throw new Error(`ไม่สามารถยกเลิกการจองได้: ${error.message}`);
+  if (!data) throw new Error('ไม่พบการจอง');
 }
 
 /**
@@ -131,8 +131,8 @@ export async function cancelBooking(args: { id: string; phone: string }): Promis
     .select('id')
     .maybeSingle();
 
-  if (error) throw new Error(`Failed to cancel booking: ${error.message}`);
-  if (!data) throw new Error('Booking not found');
+  if (error) throw new Error(`ไม่สามารถยกเลิกการจองได้: ${error.message}`);
+  if (!data) throw new Error('ไม่พบการจอง');
 }
 
 async function insertBooking(row: {
@@ -150,14 +150,14 @@ async function insertBooking(row: {
 
   if (error) {
     if (error.code === '23505') {
-      throw new Error('That slot was just taken - please pick another');
+      throw new Error('คิวนี้เพิ่งถูกจอง กรุณาเลือกเวลาอื่น');
     }
     if (error.code === '23514') {
       throw new Error(
-        'Phone number must be a Thai mobile (10 digits, starting with 06, 08, or 09)',
+        'เบอร์ต้องเป็นมือถือไทย 10 หลัก ขึ้นต้นด้วย 06, 08 หรือ 09',
       );
     }
-    throw new Error(`Failed to create booking: ${error.message}`);
+    throw new Error(`ไม่สามารถสร้างการจองได้: ${error.message}`);
   }
 
   return rowToBooking(data as BookingRow);
@@ -178,10 +178,10 @@ export async function createBooking(input: {
   const customerName = validateCustomerName(input.customerName);
 
   if (!DATE_RE.test(input.bookedOn)) {
-    throw new Error('Please pick a valid date');
+    throw new Error('กรุณาเลือกวันที่ที่ถูกต้อง');
   }
   if (!TIME_RE.test(input.slotTime)) {
-    throw new Error('Please pick a valid time slot');
+    throw new Error('กรุณาเลือกเวลาที่ถูกต้อง');
   }
 
   const today = todayInBangkok();
@@ -192,12 +192,12 @@ export async function createBooking(input: {
 
   const bookable = listBookableDates({ settings, closedDates, today });
   if (!bookable.includes(input.bookedOn)) {
-    throw new Error('That date is not available for booking');
+    throw new Error('ไม่สามารถจองในวันนี้ได้');
   }
 
   const validSlots = enumerateSlots(settings.openTime, settings.closeTime);
   if (!validSlots.includes(input.slotTime)) {
-    throw new Error('That time slot is not within shop hours');
+    throw new Error('เวลานี้อยู่นอกเวลาทำการของร้าน');
   }
 
   return insertBooking({
@@ -225,10 +225,10 @@ export async function adminCreateBooking(input: {
   const barberName = validateBarberName(input.barberName);
 
   if (!DATE_RE.test(input.bookedOn)) {
-    throw new Error('Please pick a valid date');
+    throw new Error('กรุณาเลือกวันที่ที่ถูกต้อง');
   }
   if (!TIME_RE.test(input.slotTime)) {
-    throw new Error('Please pick a valid time slot');
+    throw new Error('กรุณาเลือกเวลาที่ถูกต้อง');
   }
 
   const today = todayInBangkok();
@@ -239,12 +239,12 @@ export async function adminCreateBooking(input: {
 
   const bookable = listBookableDates({ settings, closedDates, today });
   if (!bookable.includes(input.bookedOn)) {
-    throw new Error('That date is not available for booking');
+    throw new Error('ไม่สามารถจองในวันนี้ได้');
   }
 
   const validSlots = enumerateSlots(settings.openTime, settings.closeTime);
   if (!validSlots.includes(input.slotTime)) {
-    throw new Error('That time slot is not within shop hours');
+    throw new Error('เวลานี้อยู่นอกเวลาทำการของร้าน');
   }
 
   return insertBooking({

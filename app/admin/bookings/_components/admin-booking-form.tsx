@@ -23,7 +23,7 @@ function AdminBookingSubmitButton({ disabled }: { disabled: boolean }) {
       disabled={pending || disabled}
       className="btn btn-primary"
     >
-      {pending ? 'Saving…' : 'Add booking'}
+      {pending ? 'กำลังบันทึก…' : 'เพิ่มการจอง'}
     </button>
   );
 }
@@ -40,7 +40,7 @@ export function AdminBookingForm({ bookableDates, initialDate, initialSlots }: P
   if (bookableDates.length === 0) {
     return (
       <p className="banner banner-warn">
-        No open days in the next two weeks. Adjust shop hours to book ahead.
+        ไม่มีวันที่เปิดในช่วง 2 สัปดาห์ข้างหน้า กรุณาปรับเวลาทำการเพื่อจองล่วงหน้า
       </p>
     );
   }
@@ -49,7 +49,7 @@ export function AdminBookingForm({ bookableDates, initialDate, initialSlots }: P
     <form action={adminCreateBookingAction} className="card card-pad grid grid-cols-1 gap-4 sm:grid-cols-2">
       <div className="field">
         <label className="label" htmlFor="ab-phone">
-          Customer phone
+          เบอร์โทรลูกค้า
         </label>
         <div className="input-prefix">
           <span className="prefix">+66</span>
@@ -69,7 +69,7 @@ export function AdminBookingForm({ bookableDates, initialDate, initialSlots }: P
 
       <div className="field">
         <label className="label" htmlFor="ab-name">
-          Customer name
+          ชื่อลูกค้า
         </label>
         <input
           id="ab-name"
@@ -78,14 +78,14 @@ export function AdminBookingForm({ bookableDates, initialDate, initialSlots }: P
           required
           minLength={NAME_MIN}
           maxLength={NAME_MAX}
-          placeholder="Walk-in name"
+          placeholder="ชื่อลูกค้า walk-in"
           className="input"
         />
       </div>
 
       <div className="field">
         <label className="label" htmlFor="ab-barber">
-          Barber
+          ช่างตัด
         </label>
         <input
           id="ab-barber"
@@ -94,14 +94,14 @@ export function AdminBookingForm({ bookableDates, initialDate, initialSlots }: P
           required
           minLength={NAME_MIN}
           maxLength={NAME_MAX}
-          placeholder="Barber on the chair"
+          placeholder="ชื่อช่างที่ให้บริการ"
           className="input"
         />
       </div>
 
       <div className="field">
         <label className="label" htmlFor="ab-date">
-          Date
+          วันที่
         </label>
         <select
           id="ab-date"
@@ -122,18 +122,18 @@ export function AdminBookingForm({ bookableDates, initialDate, initialSlots }: P
 
       <div className="sm:col-span-2">
         <span className="label" style={{ display: 'block', marginBottom: 6 }}>
-          Time
+          เวลา
         </span>
         <input type="hidden" name="bookedOn" value={date} required />
         <input type="hidden" name="slotTime" value={selectedSlot} required />
 
         {slotsState.loading ? (
           <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
-            Loading slots…
+            กำลังโหลดคิว…
           </p>
         ) : slotsState.list.length === 0 ? (
           <p className="text-[14px]" style={{ color: 'var(--color-faint)' }}>
-            {slotsState.error ?? 'No slots for this day.'}
+            {slotsState.error ?? 'ไม่มีคิวในวันนี้'}
           </p>
         ) : (
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">

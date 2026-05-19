@@ -9,6 +9,22 @@ export const dynamic = 'force-dynamic';
 
 const getCachedBookingById = cache(getBookingById);
 
+const THAI_WEEKDAY_SHORT = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] as const;
+const THAI_MONTH_SHORT = [
+  'ม.ค.',
+  'ก.พ.',
+  'มี.ค.',
+  'เม.ย.',
+  'พ.ค.',
+  'มิ.ย.',
+  'ก.ค.',
+  'ส.ค.',
+  'ก.ย.',
+  'ต.ค.',
+  'พ.ย.',
+  'ธ.ค.',
+] as const;
+
 export async function generateMetadata({
   searchParams,
 }: {
@@ -17,8 +33,8 @@ export async function generateMetadata({
   const { id } = await searchParams;
   const booking = id ? await getCachedBookingById(id).catch(() => null) : null;
   const title = booking
-    ? `Booking · ${booking.slotTime} ${booking.bookedOn}`
-    : 'Booking';
+    ? `การจอง · ${booking.slotTime} ${booking.bookedOn}`
+    : 'การจอง';
   return {
     title,
     robots: { index: false, follow: false },
@@ -28,13 +44,9 @@ export async function generateMetadata({
 function formatDateLabel(yyyyMmDd: string): string {
   const [y, m, d] = yyyyMmDd.split('-').map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
-  return dt.toLocaleDateString('en-US', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  });
+  // Thai Buddhist year = Gregorian + 543
+  const buddhistYear = dt.getUTCFullYear() + 543;
+  return `${THAI_WEEKDAY_SHORT[dt.getUTCDay()]} ${dt.getUTCDate()} ${THAI_MONTH_SHORT[dt.getUTCMonth()]} ${buddhistYear}`;
 }
 
 export default async function BookingConfirmedPage({
@@ -67,9 +79,9 @@ export default async function BookingConfirmedPage({
             />
           </svg>
         </div>
-        <h1 className="text-[24px] font-semibold">Booking confirmed</h1>
+        <h1 className="text-[24px] font-semibold">จองคิวสำเร็จ</h1>
         <p className="text-[14px]" style={{ color: 'var(--color-muted)' }}>
-          We&apos;ll hold your chair. Keep your phone number to look it up later.
+          เราได้เก็บคิวให้คุณเรียบร้อย กรุณาเก็บเบอร์โทรไว้สำหรับค้นหาการจองภายหลัง
         </p>
       </div>
 
@@ -79,11 +91,11 @@ export default async function BookingConfirmedPage({
             className="text-[12px] font-semibold uppercase"
             style={{ color: 'var(--color-muted)', letterSpacing: '0.06em' }}
           >
-            Booking
+            การจอง
           </span>
           <span className="badge badge-confirmed">
             <span className="badge-dot" />
-            Confirmed
+            ยืนยันแล้ว
           </span>
         </div>
 
@@ -92,28 +104,28 @@ export default async function BookingConfirmedPage({
             {formatDateLabel(booking.bookedOn)} · {booking.slotTime}
           </div>
           <div className="mt-1 text-[13px]" style={{ color: 'var(--color-muted)' }}>
-            30 min · Asia / Bangkok
+            30 นาที · Asia / Bangkok
           </div>
         </div>
 
         <div className="divider" />
 
         <dl className="grid grid-cols-[80px_1fr] gap-y-2 text-[14px]">
-          <dt style={{ color: 'var(--color-muted)' }}>Name</dt>
+          <dt style={{ color: 'var(--color-muted)' }}>ชื่อ</dt>
           <dd className="text-right font-medium">{booking.customerName}</dd>
-          <dt style={{ color: 'var(--color-muted)' }}>Phone</dt>
+          <dt style={{ color: 'var(--color-muted)' }}>เบอร์โทร</dt>
           <dd className="text-right font-medium tnum">{booking.phone}</dd>
-          <dt style={{ color: 'var(--color-muted)' }}>Ref</dt>
+          <dt style={{ color: 'var(--color-muted)' }}>อ้างอิง</dt>
           <dd className="text-right font-medium mono text-[13px]">#{ref}</dd>
         </dl>
       </section>
 
       <div className="mt-6 flex flex-col gap-2.5">
         <Link href="/lookup" className="btn btn-secondary btn-block">
-          View my bookings
+          ดูการจองของฉัน
         </Link>
         <Link href="/" className="btn btn-ghost btn-block">
-          Back to home
+          กลับหน้าหลัก
         </Link>
       </div>
     </main>

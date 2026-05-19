@@ -16,28 +16,28 @@ export default function RootError({
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center px-4 py-10 text-center sm:px-6">
-      <h1 className="text-[22px] font-semibold">Something went wrong</h1>
+      <h1 className="text-[22px] font-semibold">เกิดข้อผิดพลาด</h1>
       <p
         className="mt-2 text-[14px]"
         style={{ color: 'var(--color-muted)' }}
       >
-        Try again in a moment.
+        กรุณาลองใหม่อีกครั้ง
       </p>
       {error.digest ? (
         <p
           className="mt-2 mono text-[12px]"
           style={{ color: 'var(--color-muted)' }}
         >
-          Reference: {error.digest}
+          อ้างอิง: {error.digest}
         </p>
       ) : null}
 
       <div className="mt-6 flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
         <button type="button" onClick={reset} className="btn btn-primary">
-          Try again
+          ลองอีกครั้ง
         </button>
         <Link href="/" className="btn btn-secondary">
-          Back to home
+          กลับหน้าหลัก
         </Link>
       </div>
     </main>

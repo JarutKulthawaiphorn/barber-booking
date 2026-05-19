@@ -20,13 +20,13 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const SITE_NAME = "The Bangkok Barber";
+const SITE_NAME = "Barber Booking";
 const SITE_DESCRIPTION =
-  "Reserve a chair at The Bangkok Barber. Thirty-minute appointments in central Bangkok.";
+  "จองคิวร้านตัดผม Barber Booking — นัดหมาย 30 นาทีต่อคิว";
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_NAME} — Appointments`,
+    default: `${SITE_NAME} — จองคิวตัดผม`,
     template: `%s · ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
@@ -35,13 +35,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    title: `${SITE_NAME} — Appointments`,
+    title: `${SITE_NAME} — จองคิวตัดผม`,
     description: SITE_DESCRIPTION,
-    locale: "en_US",
+    locale: "th_TH",
   },
   twitter: {
     card: "summary",
-    title: `${SITE_NAME} — Appointments`,
+    title: `${SITE_NAME} — จองคิวตัดผม`,
     description: SITE_DESCRIPTION,
   },
   formatDetection: { telephone: false },
@@ -60,7 +60,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="th"
       className={`${inter.variable} ${notoSansThai.variable} ${jetbrainsMono.variable} antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

@@ -19,29 +19,29 @@ export function AdminHeader({ username, active }: { username: string; active: Ta
           </div>
           <div>
             <div className="text-[15px] font-semibold leading-tight">
-              Bangkok Barber
+              Barber Booking
             </div>
             <div
               className="text-[12px] leading-tight"
               style={{ color: 'var(--color-muted)' }}
             >
-              Logged in as <span style={{ color: 'var(--color-ink-2)' }}>{username}</span>
+              เข้าสู่ระบบในนาม <span style={{ color: 'var(--color-ink-2)' }}>{username}</span>
             </div>
           </div>
         </div>
         <form action="/admin/logout" method="post">
           <button type="submit" className="btn btn-ghost btn-sm">
-            Sign out
+            ออกจากระบบ
           </button>
         </form>
       </div>
 
       <nav className="mt-3 flex items-center gap-1 px-1">
         <TabLink href="/admin/bookings" active={active === 'bookings'}>
-          Schedule
+          ตารางคิว
         </TabLink>
         <TabLink href="/admin" active={active === 'settings'}>
-          Shop settings
+          ตั้งค่าร้าน
         </TabLink>
       </nav>
     </header>

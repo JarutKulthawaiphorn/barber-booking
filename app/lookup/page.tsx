@@ -7,19 +7,30 @@ import { todayInBangkok } from '@/lib/timezone';
 import { cancelBookingAction, lookupBookingsAction } from './actions';
 
 export const metadata: Metadata = {
-  title: 'Find your booking',
+  title: 'ค้นหาการจอง',
   robots: { index: false, follow: false },
 };
+
+const THAI_WEEKDAY_SHORT = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] as const;
+const THAI_MONTH_SHORT = [
+  'ม.ค.',
+  'ก.พ.',
+  'มี.ค.',
+  'เม.ย.',
+  'พ.ค.',
+  'มิ.ย.',
+  'ก.ค.',
+  'ส.ค.',
+  'ก.ย.',
+  'ต.ค.',
+  'พ.ย.',
+  'ธ.ค.',
+] as const;
 
 function formatDateLabel(yyyyMmDd: string): string {
   const [y, m, d] = yyyyMmDd.split('-').map(Number);
   const dt = new Date(Date.UTC(y, m - 1, d));
-  return dt.toLocaleDateString('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    timeZone: 'UTC',
-  });
+  return `${THAI_WEEKDAY_SHORT[dt.getUTCDay()]} ${dt.getUTCDate()} ${THAI_MONTH_SHORT[dt.getUTCMonth()]}`;
 }
 
 async function loadBookings(
@@ -35,7 +46,7 @@ async function loadBookings(
     return {
       upcoming: [],
       past: [],
-      lookupError: err instanceof Error ? err.message : 'Could not look up bookings',
+      lookupError: err instanceof Error ? err.message : 'ไม่สามารถค้นหาการจองได้',
     };
   }
 }
@@ -59,7 +70,7 @@ export default async function LookupPage({
         <Link
           href="/"
           className="btn btn-ghost btn-sm"
-          aria-label="Back"
+          aria-label="ย้อนกลับ"
           style={{ padding: '0 8px', marginLeft: -8 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -72,7 +83,7 @@ export default async function LookupPage({
             />
           </svg>
         </Link>
-        <h1 className="text-[17px] font-semibold">Your bookings</h1>
+        <h1 className="text-[17px] font-semibold">การจองของคุณ</h1>
       </header>
 
       {params.error ? (
@@ -86,7 +97,7 @@ export default async function LookupPage({
         <form action={lookupBookingsAction} className="flex flex-col gap-3">
           <div className="field">
             <label className="label" htmlFor="phone">
-              Phone
+              เบอร์โทร
             </label>
             <div className="input-prefix">
               <span className="prefix">+66</span>
@@ -104,10 +115,10 @@ export default async function LookupPage({
                 className="input tnum"
               />
             </div>
-            <span className="hint">Thai mobile starting 06, 08 or 09.</span>
+            <span className="hint">เบอร์มือถือไทย ขึ้นต้นด้วย 06, 08 หรือ 09</span>
           </div>
           <button type="submit" className="btn btn-primary btn-block">
-            Look up
+            ค้นหา
           </button>
         </form>
       </section>
@@ -131,7 +142,7 @@ export default async function LookupPage({
                       letterSpacing: '0.08em',
                     }}
                   >
-                    Upcoming
+                    ที่กำลังจะถึง
                   </h2>
                   {results.upcoming.map((b) => (
                     <UpcomingBookingCard
@@ -156,7 +167,7 @@ export default async function LookupPage({
                       letterSpacing: '0.08em',
                     }}
                   >
-                    Past
+                    ผ่านไปแล้ว
                   </h2>
                   <div
                     style={{ borderTop: '1px solid var(--color-border)' }}
@@ -175,12 +186,12 @@ export default async function LookupPage({
                             className="mt-0.5 text-[12px]"
                             style={{ color: 'var(--color-muted)' }}
                           >
-                            {b.barberName ? `with ${b.barberName}` : '30 min'}
+                            {b.barberName ? `ช่าง ${b.barberName}` : '30 นาที'}
                           </div>
                         </div>
                         <span className="badge badge-completed">
                           <span className="badge-dot" />
-                          Completed
+                          เสร็จสิ้น
                         </span>
                       </div>
                     ))}
@@ -212,12 +223,12 @@ function EmptyState() {
           />
         </svg>
       </div>
-      <div className="text-[15px] font-semibold">No bookings yet</div>
+      <div className="text-[15px] font-semibold">ยังไม่มีการจอง</div>
       <div className="text-[13px]" style={{ color: 'var(--color-muted)' }}>
-        When this number books a chair it will show here.
+        เมื่อจองคิวด้วยเบอร์นี้ การจองจะแสดงที่นี่
       </div>
       <Link href="/book" className="btn btn-secondary btn-sm mt-1">
-        Book a chair
+        จองคิว
       </Link>
     </div>
   );
@@ -252,7 +263,7 @@ function UpcomingBookingCard({
             className="mt-0.5 text-[13px]"
             style={{ color: 'var(--color-muted)' }}
           >
-            30 min{barberName ? ` · with ${barberName}` : ''}
+            30 นาที{barberName ? ` · ช่าง ${barberName}` : ''}
           </div>
           <div
             className="mt-1 text-[13px] tnum"
@@ -263,7 +274,7 @@ function UpcomingBookingCard({
         </div>
         <span className="badge badge-confirmed">
           <span className="badge-dot" />
-          Confirmed
+          ยืนยันแล้ว
         </span>
       </div>
       <div className="divider" />
@@ -271,7 +282,7 @@ function UpcomingBookingCard({
         <input type="hidden" name="id" value={id} />
         <input type="hidden" name="phone" value={phone} />
         <button type="submit" className="btn btn-danger btn-sm btn-block">
-          Cancel booking
+          ยกเลิกการจอง
         </button>
       </form>
     </div>

@@ -15,9 +15,9 @@ import { todayInBangkok } from '@/lib/timezone';
 import { BookingForm } from './_components/booking-form';
 
 export const metadata: Metadata = {
-  title: 'Book a chair',
+  title: 'จองคิว',
   description:
-    'Pick a 30-minute slot at The Bangkok Barber. Two-week booking window.',
+    'เลือกคิว 30 นาทีที่ Barber Booking จองล่วงหน้าได้สูงสุด 2 สัปดาห์',
 };
 
 export const dynamic = 'force-dynamic';
@@ -63,7 +63,7 @@ export default async function BookPage({
         <Link
           href="/"
           className="btn btn-ghost btn-sm"
-          aria-label="Back"
+          aria-label="ย้อนกลับ"
           style={{ padding: '0 8px', marginLeft: -8 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -76,7 +76,7 @@ export default async function BookPage({
             />
           </svg>
         </Link>
-        <h1 className="text-[17px] font-semibold">Book a chair</h1>
+        <h1 className="text-[17px] font-semibold">จองคิว</h1>
       </header>
 
       {params.error ? (
@@ -95,7 +95,7 @@ export default async function BookPage({
         className="mt-6 text-center text-[12px]"
         style={{ color: 'var(--color-muted)' }}
       >
-        Times shown in Asia / Bangkok · GMT+7
+        เวลาแสดงตามเขต Asia / Bangkok · GMT+7
       </p>
     </main>
   );

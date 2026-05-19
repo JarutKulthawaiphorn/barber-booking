@@ -9,7 +9,7 @@ function redirectWithError(message: string): never {
 }
 
 function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : 'Something went wrong';
+  return err instanceof Error ? err.message : 'เกิดข้อผิดพลาด';
 }
 
 export async function createBookingAction(formData: FormData): Promise<void> {

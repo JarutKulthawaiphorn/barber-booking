@@ -9,16 +9,16 @@ export default function NotFound() {
       >
         404
       </p>
-      <h1 className="mt-2 text-[22px] font-semibold">Page not found</h1>
+      <h1 className="mt-2 text-[22px] font-semibold">ไม่พบหน้านี้</h1>
       <p className="mt-2 text-[14px]" style={{ color: 'var(--color-muted)' }}>
-        The page you were looking for has moved or never existed.
+        หน้าที่คุณค้นหาอาจถูกย้ายหรือไม่มีอยู่
       </p>
       <div className="mt-6 flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row">
         <Link href="/book" className="btn btn-primary">
-          Book a chair
+          จองคิว
         </Link>
         <Link href="/" className="btn btn-secondary">
-          Back to home
+          กลับหน้าหลัก
         </Link>
       </div>
     </main>

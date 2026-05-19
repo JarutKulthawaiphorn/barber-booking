@@ -12,18 +12,18 @@ import {
 } from './actions';
 
 export const metadata: Metadata = {
-  title: 'Admin · Shop settings',
+  title: 'พนักงาน · ตั้งค่าร้าน',
   robots: { index: false, follow: false },
 };
 
 const WEEKDAY_NAMES = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
+  'อาทิตย์',
+  'จันทร์',
+  'อังคาร',
+  'พุธ',
+  'พฤหัสบดี',
+  'ศุกร์',
+  'เสาร์',
 ] as const;
 
 export default async function AdminPage({
@@ -49,17 +49,17 @@ export default async function AdminPage({
           {params.error}
         </p>
       ) : null}
-      {params.ok ? <p className="banner banner-ok mt-4">Saved.</p> : null}
+      {params.ok ? <p className="banner banner-ok mt-4">บันทึกแล้ว</p> : null}
 
       <section className="mt-6">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 className="text-[20px] font-semibold">Shop hours</h2>
+          <h2 className="text-[20px] font-semibold">เวลาเปิด-ปิดร้าน</h2>
           <span className="text-[13px]" style={{ color: 'var(--color-muted)' }}>
             Asia / Bangkok
           </span>
         </div>
         <p className="mt-1 text-[14px]" style={{ color: 'var(--color-muted)' }}>
-          Applied to every open day.
+          ใช้กับทุกวันที่เปิดทำการ
         </p>
 
         <form
@@ -68,7 +68,7 @@ export default async function AdminPage({
         >
           <div className="field">
             <label className="label" htmlFor="openTime">
-              Open time
+              เวลาเปิด
             </label>
             <input
               id="openTime"
@@ -81,7 +81,7 @@ export default async function AdminPage({
           </div>
           <div className="field">
             <label className="label" htmlFor="closeTime">
-              Close time
+              เวลาปิด
             </label>
             <input
               id="closeTime"
@@ -94,7 +94,7 @@ export default async function AdminPage({
           </div>
           <div className="field">
             <label className="label" htmlFor="weeklyClosedWeekday">
-              Closed every
+              ปิดประจำทุก
             </label>
             <select
               id="weeklyClosedWeekday"
@@ -102,17 +102,17 @@ export default async function AdminPage({
               defaultValue={settings.weeklyClosedWeekday ?? -1}
               className="select"
             >
-              <option value={-1}>Open every day</option>
+              <option value={-1}>เปิดทุกวัน</option>
               {WEEKDAY_NAMES.map((name, i) => (
                 <option key={name} value={i}>
-                  {name}
+                  วัน{name}
                 </option>
               ))}
             </select>
           </div>
           <div className="sm:col-span-3">
             <button type="submit" className="btn btn-primary">
-              Save shop hours
+              บันทึกเวลาเปิด-ปิด
             </button>
           </div>
         </form>
@@ -120,13 +120,13 @@ export default async function AdminPage({
 
       <section className="mt-8">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 className="text-[20px] font-semibold">Closed dates</h2>
+          <h2 className="text-[20px] font-semibold">วันที่ปิด</h2>
           <span className="text-[13px]" style={{ color: 'var(--color-muted)' }}>
-            {closedDates.length} listed
+            {closedDates.length} รายการ
           </span>
         </div>
         <p className="mt-1 text-[14px]" style={{ color: 'var(--color-muted)' }}>
-          One-off closures on top of the weekly closed day. Past dates are hidden.
+          วันปิดเพิ่มเติมนอกเหนือจากวันปิดประจำสัปดาห์ (ไม่แสดงวันที่ผ่านไปแล้ว)
         </p>
 
         <div className="card mt-4 overflow-hidden">
@@ -135,7 +135,7 @@ export default async function AdminPage({
               className="px-4 py-5 text-[14px]"
               style={{ color: 'var(--color-muted)' }}
             >
-              No closed dates yet.
+              ยังไม่มีวันที่ปิด
             </p>
           ) : (
             <ul className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
@@ -159,7 +159,7 @@ export default async function AdminPage({
                       className="btn btn-ghost btn-sm"
                       style={{ color: 'var(--color-danger)' }}
                     >
-                      Remove
+                      ลบ
                     </button>
                   </form>
                 </li>
@@ -174,7 +174,7 @@ export default async function AdminPage({
         >
           <div className="field">
             <label className="label" htmlFor="closedOn">
-              Date
+              วันที่
             </label>
             <input
               id="closedOn"
@@ -187,19 +187,19 @@ export default async function AdminPage({
           </div>
           <div className="field">
             <label className="label" htmlFor="note">
-              Note (optional)
+              หมายเหตุ (ถ้ามี)
             </label>
             <input
               id="note"
               type="text"
               name="note"
               maxLength={120}
-              placeholder="e.g. Public holiday"
+              placeholder="เช่น วันหยุดนักขัตฤกษ์"
               className="input"
             />
           </div>
           <button type="submit" className="btn btn-secondary">
-            Add closure
+            เพิ่มวันปิด
           </button>
         </form>
       </section>

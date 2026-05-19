@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 import { cancelBooking, validatePhone } from '@/lib/booking';
 
 function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : 'Something went wrong';
+  return err instanceof Error ? err.message : 'เกิดข้อผิดพลาด';
 }
 
 export async function lookupBookingsAction(formData: FormData): Promise<void> {
@@ -33,5 +33,5 @@ export async function cancelBookingAction(formData: FormData): Promise<void> {
     );
   }
 
-  redirect(`/lookup?phone=${encodeURIComponent(phone)}&ok=${encodeURIComponent('Booking cancelled')}`);
+  redirect(`/lookup?phone=${encodeURIComponent(phone)}&ok=${encodeURIComponent('ยกเลิกการจองแล้ว')}`);
 }
