@@ -100,7 +100,6 @@ export default async function LookupPage({
               เบอร์โทร
             </label>
             <div className="input-prefix">
-              <span className="prefix">+66</span>
               <input
                 id="phone"
                 type="tel"
@@ -109,7 +108,7 @@ export default async function LookupPage({
                 autoComplete="tel"
                 required
                 defaultValue={phone ?? ''}
-                placeholder="81 234 5678"
+                placeholder="081 234 5678"
                 pattern="[0-9\s-]*"
                 maxLength={15}
                 className="input tnum"

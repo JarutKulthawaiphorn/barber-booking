@@ -282,7 +282,6 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
             เบอร์โทร
           </label>
           <div className="input-prefix">
-            <span className="prefix">+66</span>
             <input
               id="phone"
               type="tel"
@@ -290,7 +289,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
               inputMode="numeric"
               autoComplete="tel"
               required
-              placeholder="81 234 5678"
+              placeholder="081 234 5678"
               pattern="[0-9\s-]*"
               maxLength={15}
               className="input tnum"

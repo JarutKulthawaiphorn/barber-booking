@@ -52,14 +52,13 @@ export function AdminBookingForm({ bookableDates, initialDate, initialSlots }: P
           เบอร์โทรลูกค้า
         </label>
         <div className="input-prefix">
-          <span className="prefix">+66</span>
           <input
             id="ab-phone"
             type="tel"
             name="phone"
             inputMode="numeric"
             required
-            placeholder="81 234 5678"
+            placeholder="081 234 5678"
             pattern="[0-9\s-]*"
             maxLength={15}
             className="input tnum"
