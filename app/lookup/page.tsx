@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 
 import { getBookingsByPhone, type Booking } from '@/lib/booking';
+import { formatShortDate } from '@/lib/thai-date';
 import { todayInBangkok } from '@/lib/timezone';
 
 import { cancelBookingAction, lookupBookingsAction } from './actions';
@@ -10,28 +11,6 @@ export const metadata: Metadata = {
   title: 'ค้นหาการจอง',
   robots: { index: false, follow: false },
 };
-
-const THAI_WEEKDAY_SHORT = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] as const;
-const THAI_MONTH_SHORT = [
-  'ม.ค.',
-  'ก.พ.',
-  'มี.ค.',
-  'เม.ย.',
-  'พ.ค.',
-  'มิ.ย.',
-  'ก.ค.',
-  'ส.ค.',
-  'ก.ย.',
-  'ต.ค.',
-  'พ.ย.',
-  'ธ.ค.',
-] as const;
-
-function formatDateLabel(yyyyMmDd: string): string {
-  const [y, m, d] = yyyyMmDd.split('-').map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  return `${THAI_WEEKDAY_SHORT[dt.getUTCDay()]} ${dt.getUTCDate()} ${THAI_MONTH_SHORT[dt.getUTCMonth()]}`;
-}
 
 async function loadBookings(
   phone: string,
@@ -179,7 +158,7 @@ export default async function LookupPage({
                       >
                         <div>
                           <div className="text-[15px] font-medium tnum">
-                            {formatDateLabel(b.bookedOn)} · {b.slotTime}
+                            {formatShortDate(b.bookedOn)} · {b.slotTime}
                           </div>
                           <div
                             className="mt-0.5 text-[12px]"
@@ -256,7 +235,7 @@ function UpcomingBookingCard({
             className="text-[18px] font-semibold tnum"
             style={{ letterSpacing: '-0.01em' }}
           >
-            {formatDateLabel(bookedOn)} · {slotTime}
+            {formatShortDate(bookedOn)} · {slotTime}
           </div>
           <div
             className="mt-0.5 text-[13px]"

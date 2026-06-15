@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import {
   addDays,
-  availableSlots,
   enumerateSlots,
   getWeekday,
   listBookableDates,
@@ -171,85 +170,6 @@ describe('listBookableDates', () => {
     });
     expect(dates).toHaveLength(14);
     expect(dates).toContain('2026-05-18'); // Monday no longer excluded
-  });
-});
-
-describe('availableSlots', () => {
-  const settings: ShopSettings = {
-    openTime: '09:00',
-    closeTime: '10:30',
-    weeklyClosedWeekday: 1,
-  };
-
-  it('returns every slot when no bookings exist', () => {
-    const slots = availableSlots({
-      settings,
-      closedDates: [],
-      existingBookings: [],
-      date: '2026-05-17',
-      today: '2026-05-17',
-    });
-    expect(slots).toEqual(['09:00', '09:30', '10:00']);
-  });
-
-  it('removes booked slots', () => {
-    const slots = availableSlots({
-      settings,
-      closedDates: [],
-      existingBookings: [{ slotTime: '09:30' }],
-      date: '2026-05-17',
-      today: '2026-05-17',
-    });
-    expect(slots).toEqual(['09:00', '10:00']);
-  });
-
-  it('returns empty when the date is the weekly closed weekday', () => {
-    // 2026-05-18 is a Monday.
-    expect(
-      availableSlots({
-        settings,
-        closedDates: [],
-        existingBookings: [],
-        date: '2026-05-18',
-        today: '2026-05-17',
-      }),
-    ).toEqual([]);
-  });
-
-  it('returns empty when the date is in closed_dates', () => {
-    expect(
-      availableSlots({
-        settings,
-        closedDates: [{ id: 'x', closedOn: '2026-05-19', note: null }],
-        existingBookings: [],
-        date: '2026-05-19',
-        today: '2026-05-17',
-      }),
-    ).toEqual([]);
-  });
-
-  it('returns empty when the date is outside the bookable window', () => {
-    expect(
-      availableSlots({
-        settings,
-        closedDates: [],
-        existingBookings: [],
-        date: '2030-01-01',
-        today: '2026-05-17',
-      }),
-    ).toEqual([]);
-  });
-
-  it('returns empty when the date is before today', () => {
-    expect(
-      availableSlots({
-        settings,
-        closedDates: [],
-        existingBookings: [],
-        date: '2026-05-16',
-        today: '2026-05-17',
-      }),
-    ).toEqual([]);
   });
 });
 

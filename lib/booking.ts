@@ -14,20 +14,14 @@ import { getSupabase } from './supabase/server';
 import { getShopSettings, listClosedDates } from './shop-settings';
 import { todayInBangkok } from './timezone';
 
+// Re-exported so server code can pull domain helpers from one module. Limited
+// to what's actually imported through '@/lib/booking'; client components import
+// the rest (NAME_MIN/MAX, etc.) straight from './booking-domain'.
 export {
   LOOK_AHEAD_DAYS,
-  NAME_MAX,
-  NAME_MIN,
-  SLOT_MINUTES,
   addDays,
-  availableSlots,
-  enumerateSlots,
-  getWeekday,
   listBookableDates,
-  normalizePhone,
   slotsWithStatus,
-  validateBarberName,
-  validateCustomerName,
   validatePhone,
 } from './booking-domain';
 export type { Booking, SlotStatus } from './booking-domain';

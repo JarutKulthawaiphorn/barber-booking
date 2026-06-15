@@ -5,6 +5,7 @@ import { useFormStatus } from 'react-dom';
 
 import { NAME_MAX, NAME_MIN } from '@/lib/booking-domain';
 import type { SlotStatus } from '@/lib/booking-domain';
+import { dayNumber, formatShortDate, weekdayShort } from '@/lib/thai-date';
 
 import { useSlots } from '../../_hooks/use-slots';
 import { createBookingAction } from '../actions';
@@ -16,40 +17,6 @@ type Props = {
   initialDate: string | null;
   initialSlots: SlotStatus[];
 };
-
-const THAI_WEEKDAY_SHORT = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] as const;
-const THAI_MONTH_SHORT = [
-  'ม.ค.',
-  'ก.พ.',
-  'มี.ค.',
-  'เม.ย.',
-  'พ.ค.',
-  'มิ.ย.',
-  'ก.ค.',
-  'ส.ค.',
-  'ก.ย.',
-  'ต.ค.',
-  'พ.ย.',
-  'ธ.ค.',
-] as const;
-
-function parseDateUTC(yyyyMmDd: string): Date {
-  const [y, m, d] = yyyyMmDd.split('-').map(Number);
-  return new Date(Date.UTC(y, m - 1, d));
-}
-
-function dayNumber(date: string): number {
-  return parseDateUTC(date).getUTCDate();
-}
-
-function weekdayShort(date: string): string {
-  return THAI_WEEKDAY_SHORT[parseDateUTC(date).getUTCDay()];
-}
-
-function formatPickedDate(date: string): string {
-  const dt = parseDateUTC(date);
-  return `${THAI_WEEKDAY_SHORT[dt.getUTCDay()]} ${dt.getUTCDate()} ${THAI_MONTH_SHORT[dt.getUTCMonth()]}`;
-}
 
 function BookingSubmitButton({ disabled }: { disabled: boolean }) {
   const { pending } = useFormStatus();
@@ -164,7 +131,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
           <h2 className="text-[22px] font-semibold">เลือกเวลา</h2>
           {date && (
             <span className="text-[13px]" style={{ color: 'var(--color-muted)' }}>
-              {formatPickedDate(date)}
+              {formatShortDate(date)}
             </span>
           )}
         </div>
@@ -313,7 +280,7 @@ export function BookingForm({ dayGrid, initialDate, initialSlots }: Props) {
           <div className="flex items-center justify-between text-[14px]">
             <span style={{ color: 'var(--color-muted)' }}>ที่เลือก</span>
             <span className="font-semibold tnum">
-              {formatPickedDate(date)} · {selectedSlot}
+              {formatShortDate(date)} · {selectedSlot}
             </span>
           </div>
         ) : null}

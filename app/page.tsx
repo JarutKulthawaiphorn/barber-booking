@@ -2,22 +2,13 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 
 import { getShopSettings } from '@/lib/shop-settings';
-
-const WEEKDAY_NAMES = [
-  'อาทิตย์',
-  'จันทร์',
-  'อังคาร',
-  'พุธ',
-  'พฤหัสบดี',
-  'ศุกร์',
-  'เสาร์',
-] as const;
+import { THAI_WEEKDAY_NAMES } from '@/lib/thai-date';
 
 function formatOpenDayRange(weeklyClosed: number | null): string {
   if (weeklyClosed === null) return 'ทุกวัน';
   const start = (weeklyClosed + 1) % 7;
   const end = (weeklyClosed + 6) % 7;
-  return `${WEEKDAY_NAMES[start]} – ${WEEKDAY_NAMES[end]}`;
+  return `${THAI_WEEKDAY_NAMES[start]} – ${THAI_WEEKDAY_NAMES[end]}`;
 }
 
 async function HoursTile() {
@@ -35,7 +26,7 @@ async function HoursTile() {
       {settings.weeklyClosedWeekday !== null ? (
         <div className="flex items-baseline justify-between gap-3 text-[15px]">
           <span style={{ color: 'var(--color-ink-2)' }}>
-            {WEEKDAY_NAMES[settings.weeklyClosedWeekday]}
+            {THAI_WEEKDAY_NAMES[settings.weeklyClosedWeekday]}
           </span>
           <span style={{ color: 'var(--color-muted)' }}>ปิด</span>
         </div>

@@ -4,26 +4,11 @@ import { notFound } from 'next/navigation';
 import { cache } from 'react';
 
 import { getBookingById } from '@/lib/booking';
+import { formatShortDateWithYear } from '@/lib/thai-date';
 
 export const dynamic = 'force-dynamic';
 
 const getCachedBookingById = cache(getBookingById);
-
-const THAI_WEEKDAY_SHORT = ['อา', 'จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส'] as const;
-const THAI_MONTH_SHORT = [
-  'ม.ค.',
-  'ก.พ.',
-  'มี.ค.',
-  'เม.ย.',
-  'พ.ค.',
-  'มิ.ย.',
-  'ก.ค.',
-  'ส.ค.',
-  'ก.ย.',
-  'ต.ค.',
-  'พ.ย.',
-  'ธ.ค.',
-] as const;
 
 export async function generateMetadata({
   searchParams,
@@ -39,14 +24,6 @@ export async function generateMetadata({
     title,
     robots: { index: false, follow: false },
   };
-}
-
-function formatDateLabel(yyyyMmDd: string): string {
-  const [y, m, d] = yyyyMmDd.split('-').map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  // Thai Buddhist year = Gregorian + 543
-  const buddhistYear = dt.getUTCFullYear() + 543;
-  return `${THAI_WEEKDAY_SHORT[dt.getUTCDay()]} ${dt.getUTCDate()} ${THAI_MONTH_SHORT[dt.getUTCMonth()]} ${buddhistYear}`;
 }
 
 export default async function BookingConfirmedPage({
@@ -101,7 +78,7 @@ export default async function BookingConfirmedPage({
 
         <div>
           <div className="text-[22px] font-semibold tnum" style={{ letterSpacing: '-0.01em' }}>
-            {formatDateLabel(booking.bookedOn)} · {booking.slotTime}
+            {formatShortDateWithYear(booking.bookedOn)} · {booking.slotTime}
           </div>
           <div className="mt-1 text-[13px]" style={{ color: 'var(--color-muted)' }}>
             30 นาที · Asia / Bangkok

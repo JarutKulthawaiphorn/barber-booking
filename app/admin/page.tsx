@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import { requireAdmin } from '@/lib/auth';
 import { getShopSettings, listClosedDates } from '@/lib/shop-settings';
+import { THAI_WEEKDAY_NAMES } from '@/lib/thai-date';
 import { todayInBangkok } from '@/lib/timezone';
 
 import { AdminHeader } from './_components/admin-header';
@@ -15,16 +16,6 @@ export const metadata: Metadata = {
   title: 'พนักงาน · ตั้งค่าร้าน',
   robots: { index: false, follow: false },
 };
-
-const WEEKDAY_NAMES = [
-  'อาทิตย์',
-  'จันทร์',
-  'อังคาร',
-  'พุธ',
-  'พฤหัสบดี',
-  'ศุกร์',
-  'เสาร์',
-] as const;
 
 export default async function AdminPage({
   searchParams,
@@ -103,7 +94,7 @@ export default async function AdminPage({
               className="select"
             >
               <option value={-1}>เปิดทุกวัน</option>
-              {WEEKDAY_NAMES.map((name, i) => (
+              {THAI_WEEKDAY_NAMES.map((name, i) => (
                 <option key={name} value={i}>
                   วัน{name}
                 </option>

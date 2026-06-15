@@ -140,25 +140,6 @@ export function listBookableDates(args: {
 }
 
 /**
- * Slot times still available on `date`, given existing bookings for that date.
- * Returns an empty array if the date is outside the bookable window.
- */
-export function availableSlots(args: {
-  settings: ShopSettings;
-  closedDates: ClosedDate[];
-  existingBookings: Pick<Booking, 'slotTime'>[];
-  date: string;
-  today: string;
-  lookAheadDays?: number;
-}): string[] {
-  if (!listBookableDates(args).includes(args.date)) return [];
-  const taken = new Set(args.existingBookings.map((b) => b.slotTime));
-  return enumerateSlots(args.settings.openTime, args.settings.closeTime).filter(
-    (s) => !taken.has(s),
-  );
-}
-
-/**
  * All slots for `date` with a `taken` flag, so the UI can render reserved slots
  * as disabled buttons instead of hiding them. Returns an empty array if the
  * date is outside the bookable window.

@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { requireAdmin } from '@/lib/auth';
 import { listBookableDates, listBookingsOnDate, slotsWithStatus } from '@/lib/booking';
 import { getShopSettings, listClosedDates } from '@/lib/shop-settings';
+import { formatLongDateWithYear } from '@/lib/thai-date';
 import { todayInBangkok } from '@/lib/timezone';
 
 import { AdminHeader } from '../_components/admin-header';
@@ -16,37 +17,6 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const THAI_WEEKDAY_LONG = [
-  'อาทิตย์',
-  'จันทร์',
-  'อังคาร',
-  'พุธ',
-  'พฤหัสบดี',
-  'ศุกร์',
-  'เสาร์',
-] as const;
-const THAI_MONTH_LONG = [
-  'มกราคม',
-  'กุมภาพันธ์',
-  'มีนาคม',
-  'เมษายน',
-  'พฤษภาคม',
-  'มิถุนายน',
-  'กรกฎาคม',
-  'สิงหาคม',
-  'กันยายน',
-  'ตุลาคม',
-  'พฤศจิกายน',
-  'ธันวาคม',
-] as const;
-
-function formatDateLabel(yyyyMmDd: string): string {
-  const [y, m, d] = yyyyMmDd.split('-').map(Number);
-  const dt = new Date(Date.UTC(y, m - 1, d));
-  const buddhistYear = dt.getUTCFullYear() + 543;
-  return `${THAI_WEEKDAY_LONG[dt.getUTCDay()]} ${dt.getUTCDate()} ${THAI_MONTH_LONG[dt.getUTCMonth()]} ${buddhistYear}`;
-}
-
 export default async function AdminBookingsPage({
   searchParams,
 }: {
@@ -56,7 +26,7 @@ export default async function AdminBookingsPage({
   const params = await searchParams;
   const today = todayInBangkok();
   const date = params.date && DATE_RE.test(params.date) ? params.date : today;
-  const label = formatDateLabel(date);
+  const label = formatLongDateWithYear(date);
   const isToday = date === today;
 
   const [bookings, settings, closedDates] = await Promise.all([
