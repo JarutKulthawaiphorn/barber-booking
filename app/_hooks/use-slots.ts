@@ -20,6 +20,10 @@ export type SlotsState = {
  * paint of the customer booking form) and skip the duplicate client fetch on
  * mount. The hook still re-fetches when the user picks a different date.
  *
+ * The no-fetch states (no date, or the server-seeded date) are derived during
+ * render, so the effect runs only for the async fetch path — that keeps
+ * setState out of the effect's synchronous body and the deps complete.
+ *
  * Extracted from the customer and admin booking forms so both share the same
  * loading/error contract — they previously hand-rolled near-identical effects.
  */
@@ -30,37 +34,28 @@ export function useSlots(
   const seed = opts.initial ?? [];
   const skipFor = opts.skipInitialFor ?? null;
 
-  const [state, setState] = useState<SlotsState>({
-    loading: !!date && date !== skipFor,
-    list: seed,
-    error: null,
-  });
+  // Holds the outcome of the latest fetch, tagged with the date it was for so a
+  // stale result is never shown against a newer `date`.
+  const [fetched, setFetched] = useState<{ date: string; state: SlotsState } | null>(null);
 
   useEffect(() => {
-    if (!date) {
-      setState({ loading: false, list: [], error: null });
-      return;
-    }
-    if (date === skipFor) {
-      // Server already rendered this date's slots; trust the seed.
-      setState({ loading: false, list: seed, error: null });
-      return;
-    }
+    if (!date || date === skipFor) return;
 
     let cancelled = false;
-    setState((s) => ({ ...s, loading: true, error: null }));
-
     void (async () => {
       try {
         const list = await fetchSlots(date);
         if (cancelled) return;
-        setState({ loading: false, list, error: null });
+        setFetched({ date, state: { loading: false, list, error: null } });
       } catch (err) {
         if (cancelled) return;
-        setState({
-          loading: false,
-          list: [],
-          error: err instanceof Error ? err.message : 'Could not load slots',
+        setFetched({
+          date,
+          state: {
+            loading: false,
+            list: [],
+            error: err instanceof Error ? err.message : 'Could not load slots',
+          },
         });
       }
     })();
@@ -68,11 +63,11 @@ export function useSlots(
     return () => {
       cancelled = true;
     };
-    // `seed` and `skipFor` are stable values produced on the server side; we
-    // intentionally key only on `date` to avoid re-fetching when the parent
-    // re-renders with the same identity-changed seed array.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [date]);
+  }, [date, skipFor]);
 
-  return state;
+  if (!date) return { loading: false, list: [], error: null };
+  // Server already rendered this date's slots; trust the seed, no client fetch.
+  if (date === skipFor) return { loading: false, list: seed, error: null };
+  if (fetched && fetched.date === date) return fetched.state;
+  return { loading: true, list: [], error: null };
 }
