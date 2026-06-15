@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
 
 import { getShopSettings } from '@/lib/shop-settings';
@@ -12,6 +13,11 @@ function formatOpenDayRange(weeklyClosed: number | null): string {
 }
 
 async function HoursTile() {
+  // Defer to request time: the shop-settings read hits Supabase, which must not
+  // run during build-time prerender (a paused/unreachable DB would fail the
+  // build). The static shell above still prerenders; the Suspense fallback
+  // covers this tile until the data resolves at request time.
+  await connection();
   const settings = await getShopSettings();
   return (
     <>
